@@ -1,13 +1,11 @@
-// RETIREMENT NOTICE — stage 1/4
+// RETIREMENT NOTICE — stage 2/4
 //
-// The canonical built-in dataset loader is scheduled for complete removal.
-// No runtime behavior changes in this stage.
-// Planned sequence: notice -> stop integrity/normalization work -> empty compatibility shelf -> delete.
+// Built-in JSON chunks are still assembled, but normalization and validation
+// have been retired. The loader now returns the assembled source pack directly.
+// Remaining sequence: empty compatibility shelf -> delete.
 
 import builtinMeta from '../../data/builtin/meta.json';
 import type { LoopDeckPack, Question } from '../core/models';
-import { validatePack } from './packValidator';
-import { normalizeBuiltinPack } from './builtinNormalizer';
 
 type QuestionChunk = Question[];
 type BuiltinMeta = Omit<LoopDeckPack, 'questions'>;
@@ -44,13 +42,7 @@ function sourcePackFromChunks(): LoopDeckPack {
 }
 
 export function loadBuiltinPacks(): LoopDeckPack[] {
-  const normalizedPack = normalizeBuiltinPack(sourcePackFromChunks());
-  const result = validatePack(normalizedPack);
-  if (!result.ok || !result.pack) {
-    console.error(result.issues);
-    throw new Error('Built-in LoopDeck pack is invalid.');
-  }
-  return [result.pack];
+  return [sourcePackFromChunks()];
 }
 
 export function getBuiltinSourcePackForTesting(): LoopDeckPack {
