@@ -1,0 +1,1 @@
+Offline three-player mahjong product builder. The builder verifies the exact standalone product SHA-256 before writing play.html.
