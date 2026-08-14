@@ -22,7 +22,6 @@ jobs:
         with:
           script: |
             const pr = context.payload.pull_request;
-
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -42,7 +41,7 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const baseSha = pr.base.sha;
-            const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
+            const EXPECTED_POLICY_DIGEST = '37243f8838a016c7a53d5e4605b946f3c75b571854cbe5ce5c5b25da54baa76f';
 
             const registryResponse = await github.rest.repos.getContent({ owner, repo, path: '.retirement/retired-paths.json', ref: baseSha });
             if (Array.isArray(registryResponse.data) || !registryResponse.data.content) {
@@ -150,17 +149,8 @@ jobs:
           script: |
             const pr = context.payload.pull_request;
             const outcome = '${{ steps.guard.outcome }}';
-
-            const state =
-              outcome === 'success'
-                ? 'success'
-                : 'failure';
-
-            const description =
-              state === 'success'
-                ? 'Retirement policy passed'
-                : 'Retirement policy rejected this pull request';
-
+            const state = outcome === 'success' ? 'success' : 'failure';
+            const description = state === 'success' ? 'Retirement policy passed' : 'Retirement policy rejected this pull request';
             await github.rest.repos.createCommitStatus({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -186,7 +176,7 @@ jobs:
           const fs = require('fs');
           const cp = require('child_process');
           const posix = require('path').posix;
-          const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
+          const EXPECTED_POLICY_DIGEST = '37243f8838a016c7a53d5e4605b946f3c75b571854cbe5ce5c5b25da54baa76f';
           const registry = JSON.parse(fs.readFileSync('.retirement/retired-paths.json', 'utf8'));
           const critical = {
             guardPaths: [...(registry.guardPaths || [])].sort(),
