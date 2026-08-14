@@ -1,7 +1,7 @@
-// RETIREMENT 4/10 — RISK ANALYSIS RETIRED
+// RETIREMENT 5/10 — HAND-VALUE HEURISTICS RETIRED
 //
-// Push/fold mode, danger scoring, and CpuRiskAnalysis integration are gone.
-// Hand-value, shape, and shanten heuristics remain for later stages.
+// Dora, red-tile, meld, honor, and kita value bonuses are gone.
+// Shape and shanten heuristics remain for later stages.
 
 (function attachCpuStrategy(global){
   const Sanma=global.Sanma=global.Sanma||{};
@@ -10,7 +10,6 @@
   function estimateShanten(input){const o=input||{},conv=Sanma.HandAnalysis.toCountArray(Array.isArray(o.tiles)?o.tiles:[],o.ruleConfig||{});if(!conv.isValid)return 99;const open=Math.max(0,Number(o.openMeldCount)||0),vals=[standard(conv.counts.slice(),open)];if(!open){const pairs=conv.counts.filter(x=>x>=2).length,unique=conv.counts.filter(Boolean).length;vals.push(6-pairs+Math.max(0,7-unique));if(!(o.ruleConfig&&o.ruleConfig.northMode==='disabled')){const req=[0,8,9,17,18,26,27,28,29,30,31,32,33],u=req.filter(i=>conv.counts[i]>0).length,p=req.some(i=>conv.counts[i]>=2);vals.push(13-u-(p?1:0));}}return Math.min(...vals);}
   const counts=(tiles,rule)=>Sanma.HandAnalysis.toCountArray(tiles,rule||{}).counts;
   function sequenceShape(tile,c){if(!tile||!['p','s'].includes(tile.suit))return false;const i=Sanma.HandAnalysis.getTypeIndex(tile);return[-2,-1,1,2].some(o=>{const n=i+o;return n>=0&&n<c.length&&Math.floor(n/9)===Math.floor(i/9)&&c[n]>0;});}
-  function value(player,tiles,state,rule){const c=counts(tiles,rule),d=new Set(((state&&state.wall&&state.wall.doraIndicators)||(state&&state.doraIndicators)||[]).filter(Boolean).map(t=>t.baseId));let v=0;c.forEach((n,i)=>{if(n>=3)v+=24;else if(n>=2)v+=8;if(i>=27&&n>=2)v+=6;});tiles.forEach(t=>{if(!t)return;if(t.isRed)v+=8;if(d.has(t.baseId))v+=6;if(t.suit==='z'&&t.rank>=5)v+=4;});(player&&player.melds||[]).forEach(m=>{v+=m&&m.type==='kan'?24:14;});v+=(player&&player.kitaTiles||[]).length*8;return v;}
   function chooseDiscard(input){
     const o=input||{},p=o.player||{},hand=Array.isArray(p.hand)?p.hand:[],rule=o.ruleConfig||{},rand=typeof o.random==='function'?o.random:Math.random;
     if(!hand.length)return{tileInstanceId:null,reason:'手牌がありません。',candidates:[],score:0};
@@ -27,13 +26,11 @@
       if(win){score+=1000;reasons.push('和了可能');}
       if(t.isRed&&n>=2){score-=8;reasons.push('赤牌を温存');}
       if(!reasons.length)reasons.push('シャンテン優先');
-      const handValue=value(p,left,o.state,rule);
-      score+=handValue*.12;
       const tie=rand();
-      return{tileInstanceId:t.instanceId,tileLabel:Sanma.TileUtil.getTileAriaLabel(t),tileType:t.baseId,handValue,score:score+tie/1000,baseScore:score,shanten:sh,tenpai,reasons,tieBreaker:tie};
+      return{tileInstanceId:t.instanceId,tileLabel:Sanma.TileUtil.getTileAriaLabel(t),tileType:t.baseId,score:score+tie/1000,baseScore:score,shanten:sh,tenpai,reasons,tieBreaker:tie};
     }).sort((a,b)=>b.score-a.score||String(a.tileInstanceId).localeCompare(String(b.tileInstanceId)));
     const s=cand[0];
-    return{tileInstanceId:s.tileInstanceId,reason:`${s.reasons.join('、')}。シャンテン推定 ${s.shanten}。`,candidates:cand,score:s.baseScore,handValue:s.handValue};
+    return{tileInstanceId:s.tileInstanceId,reason:`${s.reasons.join('、')}。シャンテン推定 ${s.shanten}。`,candidates:cand,score:s.baseScore};
   }
   function chooseCall(){return null;}
   Sanma.CpuStrategy={chooseDiscard,estimateShanten,chooseCall};
