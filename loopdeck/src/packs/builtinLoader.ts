@@ -4,6 +4,7 @@ import { validatePack } from './packValidator';
 import { normalizeBuiltinPack } from './builtinNormalizer';
 
 type QuestionChunk = Question[];
+type BuiltinMeta = Omit<LoopDeckPack, 'questions'>;
 
 const chunkModules = import.meta.glob('../../data/builtin/questions/*.json', {
   eager: true,
@@ -14,6 +15,7 @@ function sourcePackFromChunks(): LoopDeckPack {
   const questions = Object.entries(chunkModules)
     .sort(([left], [right]) => left.localeCompare(right))
     .flatMap(([, chunk]) => chunk);
+  const meta = builtinMeta as unknown as BuiltinMeta;
 
   const questionIdsByModule = new Map<string, string[]>();
   for (const question of questions) {
@@ -23,8 +25,8 @@ function sourcePackFromChunks(): LoopDeckPack {
   }
 
   return {
-    ...(builtinMeta as LoopDeckPack),
-    modules: builtinMeta.modules.map((module) => ({
+    ...meta,
+    modules: meta.modules.map((module) => ({
       ...module,
       questionIds: questionIdsByModule.get(module.id) ?? []
     })),
