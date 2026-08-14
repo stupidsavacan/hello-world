@@ -25,7 +25,13 @@ This record is provenance only; it is not authorization to bypass the current Gu
 
 ## Remaining LoopDeck material
 
-`loopdeck/tests/**` still contains historical contract/regression tests, but this repository no longer contains an executable LoopDeck package: its source entry points, build configuration, built-in data path, Android wrapper, and later `loopdeck/client` migration path are retired.
+`loopdeck/tests/**` still contains historical contract/regression tests. The source they exercised is retired, so the suite is not an independently runnable product in the current tree, but these files remain useful as **executable recovery specifications** for the last reconstructed implementation.
+
+They cover behavior including analytics, answer judging, choice generation, database migration, home grouping, inline-quiz images, native saves, pack assets and merging, question presentation, review scheduling/session behavior, worksheet PDF generation, wrong-answer explanations, and ZIP export.
+
+For the ongoing recovery effort, preserve these test files as evidence of expected behavior. A staged retirement notice introduced by PR #222 was removed because deleting the specifications would reduce the ability to verify or compare a future legitimate reconstruction; this does not reactivate any retired runtime path.
+
+This repository still does not contain an executable LoopDeck package: its source entry points, build configuration, built-in data path, Android wrapper, and later `loopdeck/client` migration path are retired.
 
 ## Continuation rule
 
