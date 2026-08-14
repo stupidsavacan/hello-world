@@ -1,0 +1,1 @@
+Run `python mahjong/build-offline.py` once. It reconstructs `mahjong/play.html` exactly from the tracked payload chunks, verifies SHA-256, and the generated HTML is fully self-contained for offline play.
