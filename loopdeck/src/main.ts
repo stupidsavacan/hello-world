@@ -1,37 +1,17 @@
-// RETIREMENT NOTICE — STAGE 2/4
+// RETIREMENT NOTICE — STAGE 3/4
 //
-// LoopDeck's browser entry point no longer orchestrates the application.
-// Pack loading, persistence, Home/Module/Review/Import/Graphs navigation,
-// worksheet routing, and screen-module delegation have all been removed here.
-//
-// The browser entry still mounts a visible retirement notice. That remaining
-// doorway is the only responsibility left before stage 3 reduces it further.
+// The LoopDeck browser entry point is now a compatibility doorway only.
+// It imports nothing, loads nothing, persists nothing, and routes nowhere.
 //
 // Completed:
 // 1. announce retirement
 // 2. remove navigation/orchestration responsibility
+// 3. reduce to a compatibility doorway
 //
 // Remaining:
-// 3. reduce to a compatibility doorway
 // 4. delete the file
 //
-// 玄関記録: 部屋番号はすべて剥がされた。受付だけが、まだ立っている。
+// 玄関記録: 建物はもう案内しない。扉に残った一文だけが住所を名乗る。
 
 const appRoot = document.querySelector<HTMLDivElement>('#app');
-
-if (appRoot) {
-  const notice = document.createElement('main');
-  notice.dataset.loopdeckRetirementStage = '2/4';
-
-  const title = document.createElement('h1');
-  title.textContent = 'LoopDeck — retirement stage 2/4';
-
-  const body = document.createElement('p');
-  body.textContent = 'Navigation and application orchestration have retired. This doorway no longer leads to study, review, import, graphs, or worksheets.';
-
-  const epitaph = document.createElement('p');
-  epitaph.textContent = '入口は残った。行き先だけが、先にいなくなった。';
-
-  notice.append(title, body, epitaph);
-  appRoot.replaceChildren(notice);
-}
+if (appRoot) appRoot.textContent = 'LoopDeck retirement stage 3/4 — doorway only.';
