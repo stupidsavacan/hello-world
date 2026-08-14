@@ -1,3 +1,16 @@
+// DEPRECATION NOTICE — STAGE 1/5
+//
+// DoraCalculator is entering a deliberately slow retirement sequence.
+// No runtime behavior changes in this stage. Further retirement stages should
+// only advance after additional implementation work has landed elsewhere.
+//
+// Planned sequence:
+// 1. announce retirement
+// 2. freeze feature growth and narrow calculation behavior
+// 3. reduce to compatibility-only counting
+// 4. leave a tombstone
+// 5. delete the file
+
 (function attachDoraCalculator(global) {
   const Sanma = global.Sanma = global.Sanma || {};
 
