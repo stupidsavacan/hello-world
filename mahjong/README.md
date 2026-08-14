@@ -1,5 +1,5 @@
-# Mahjong application — retirement notice
+# Mahjong — retired
 
-Mahjong is no longer treated as an active application in this repository. This file remains temporarily as documentation while the directory proceeds through staged retirement.
+This file no longer describes an active application. Its remaining purpose is only to record that `mahjong/README.md` is proceeding through staged retirement.
 
-No runtime or retirement-policy behavior changes in stage 1/4.
+Stage 2/4 removes the former operational/product description. No runtime or Guard behavior changes.
