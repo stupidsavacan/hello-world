@@ -24,7 +24,6 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const baseSha = pr.base.sha;
-            const headSha = pr.head.sha;
 
             const registryResponse = await github.rest.repos.getContent({
               owner,
@@ -43,6 +42,7 @@ jobs:
             const retiredPaths = new Set(registry.retiredPaths || []);
             const guardPaths = new Set(registry.guardPaths || []);
             const retiredRoots = (registry.retiredModuleRoots || []).map(canonicalModulePath);
+            const retiredMarkers = registry.retiredContractMarkers || [];
 
             function canonicalModulePath(input) {
               let value = posix.normalize(String(input || '')).replace(/^\.\//, '');
@@ -97,6 +97,7 @@ jobs:
             const guardChanges = files.filter((file) => guardPaths.has(file.filename));
 
             const importViolations = [];
+            const markerViolations = [];
             const scanExtensions = /\.(?:[cm]?[jt]sx?)$/i;
             for (const file of liveFiles) {
               if (!scanExtensions.test(file.filename) || !file.sha) continue;
@@ -117,10 +118,15 @@ jobs:
                   importViolations.push(`${file.filename} -> ${specifier} (${resolved})`);
                 }
               }
+
+              for (const marker of retiredMarkers) {
+                if (source.includes(marker)) markerViolations.push(`${file.filename} -> ${marker}`);
+              }
             }
 
             const uniqueAliases = [...new Set(moduleAliasResurrections.map((file) => file.filename))];
             const uniqueImports = [...new Set(importViolations)];
+            const uniqueMarkers = [...new Set(markerViolations)];
 
             if (exactResurrections.length) {
               core.error(`Retired exact paths were reintroduced: ${exactResurrections.map((file) => file.filename).join(', ')}`);
@@ -131,16 +137,19 @@ jobs:
             if (uniqueImports.length) {
               core.error(`Changed source/tests import retired module contracts: ${uniqueImports.join(' | ')}`);
             }
+            if (uniqueMarkers.length) {
+              core.error(`Changed source/tests restore retired public contract markers: ${uniqueMarkers.join(' | ')}`);
+            }
             if (guardChanges.length) {
               core.error(`Retirement sentries were changed by the PR: ${guardChanges.map((file) => file.filename).join(', ')}`);
             }
 
-            if (exactResurrections.length || uniqueAliases.length || uniqueImports.length || guardChanges.length) {
-              core.setFailed('README-only retirement contract violated. Exact-path, directory-module, renamed-test, and sentry-tampering bypasses are blocked by the base-branch policy.');
+            if (exactResurrections.length || uniqueAliases.length || uniqueImports.length || uniqueMarkers.length || guardChanges.length) {
+              core.setFailed('README-only retirement contract violated. Exact-path, directory-module, renamed-test, renamed-contract, and sentry-tampering bypasses are blocked by the base-branch policy.');
               return;
             }
 
-            core.info('Retirement contract clean: no retired path, module alias, retired import, or sentry tampering found.');
+            core.info('Retirement contract clean: no retired path, module alias, retired import/API marker, or sentry tampering found.');
 
   current-tree:
     if: github.event_name == 'push'
