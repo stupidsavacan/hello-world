@@ -2,6 +2,19 @@ import assert from 'node:assert/strict';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+const guardFiles = [
+  'tests/answerJudge.test.ts',
+  '../mahjong/tests/foundation.test.js',
+  '../mahjong/tests/loopdeck-retirement-policy.test.js',
+  '../.github/workflows/cross-retirement-policy.yml',
+];
+const missingGuards = guardFiles.filter((path) => !existsSync(resolve(process.cwd(), path)));
+assert.deepEqual(
+  missingGuards,
+  [],
+  `retirement sentry integrity failed; missing guards: ${missingGuards.join(', ')}`,
+);
+
 const retiredMahjongPaths = [
   '../mahjong/src/game/ActionResolver.js',
   '../mahjong/src/game/AssistManager.js',
@@ -25,4 +38,4 @@ assert.deepEqual(
   `README-only retirement policy: retired Mahjong paths returned: ${resurrected.join(', ')}`,
 );
 
-console.log('mahjong retirement policy: no retired paths have returned');
+console.log('mahjong retirement policy: sentries intact; no retired paths have returned');
