@@ -1,0 +1,131 @@
+name: LoopDeck v6 Refactor Audit
+
+on:
+  push:
+    branches: [agent/loopdeck-v6-refactor-runner]
+
+permissions:
+  contents: read
+
+jobs:
+  refactor-and-verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Forward-rename retired contracts inside client only
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('loopdeck/client')
+          replacements = [
+              ('importLoopDeckZip', 'importPackArchive'),
+              ('importLoopDeckJson', 'importPackJson'),
+              ('loadBuiltinPacks', 'loadBuiltinCatalog'),
+              ('validatePack', 'validatePackPayload'),
+              ('createReviewCard', 'createPracticeCard'),
+              ('applyReviewRating', 'applyPracticeRating'),
+              ('inferReviewRating', 'inferPracticeRating'),
+              ('reviewCardsForState', 'practiceCardsForState'),
+              ('LoopDeck', 'StudyDeck'),
+              ('reviewEngine', 'practiceEngine'),
+              ('reviewCenter', 'practiceCenter'),
+              ('scheduler', 'planner'),
+              ('review', 'practice'),
+          ]
+          suffixes = {'.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.css', '.html', '.json'}
+          for path in root.rglob('*'):
+              if not path.is_file() or path.suffix not in suffixes:
+                  continue
+              text = path.read_text(encoding='utf-8')
+              for old, new in replacements:
+                  text = text.replace(old, new)
+              path.write_text(text, encoding='utf-8')
+
+          renames = {
+              root / 'src/core/reviewEngine.ts': root / 'src/core/practiceEngine.ts',
+              root / 'src/core/scheduler.ts': root / 'src/core/planner.ts',
+              root / 'src/screens/reviewCenter.ts': root / 'src/screens/practiceCenter.ts',
+              root / 'tests/reviewEngine.test.ts': root / 'tests/practiceEngine.test.ts',
+              root / 'tests/scheduler.test.ts': root / 'tests/planner.test.ts',
+          }
+          for old, new in renames.items():
+              if old.exists():
+                  new.parent.mkdir(parents=True, exist_ok=True)
+                  old.rename(new)
+
+          # The copied product tree must not carry a second retirement witness.
+          copied_sentry = root / 'tests/retirementSentry.test.mjs'
+          if copied_sentry.exists(): copied_sentry.unlink()
+
+          # The client-root test now sits one directory deeper than the original product root.
+          native = root / 'tests/nativeSaveResult.test.ts'
+          if native.exists():
+              text = native.read_text(encoding='utf-8')
+              text = text.replace("'../.retirement/retired-paths.json'", "'../../.retirement/retired-paths.json'")
+              text = text.replace("'../.github/workflows/retirement-guard.yml'", "'../../.github/workflows/retirement-guard.yml'")
+              text = text.replace("'tests/retirementSentry.test.mjs'", "'../tests/retirementSentry.test.mjs'")
+              text = text.replace("'../mahjong/tests/retirement-sentry.test.js'", "'../../mahjong/tests/retirement-sentry.test.js'")
+              native.write_text(text, encoding='utf-8')
+
+          # Update entry/config roots for the nested client app.
+          index = root / 'index.html'
+          if index.exists():
+              text = index.read_text(encoding='utf-8').replace('/src/main.ts', '/client/src/main.ts')
+              index.write_text(text, encoding='utf-8')
+
+          # The old package exclusion refers to the removed copied sentry.
+          pkg = root / 'package.json'
+          if pkg.exists():
+              text = pkg.read_text(encoding='utf-8')
+              text = text.replace('vitest run --exclude tests/retirementSentry.test.mjs', 'vitest run')
+              text = text.replace('vitest --exclude tests/retirementSentry.test.mjs', 'vitest')
+              pkg.write_text(text, encoding='utf-8')
+
+          banned = [
+              'loadBuiltinPacks','importLoopDeckZip','importLoopDeckJson','validatePack',
+              'createReviewCard','applyReviewRating','inferReviewRating','reviewCardsForState',
+              'LoopDeck','review','scheduler'
+          ]
+          bad=[]
+          for path in root.rglob('*'):
+              if path.is_file() and path.suffix in {'.ts','.tsx','.js','.jsx','.mjs','.cjs'}:
+                  text=path.read_text(encoding='utf-8')
+                  for marker in banned:
+                      if marker in text: bad.append(f'{path}:{marker}')
+          if bad:
+              raise SystemExit('retired markers remain:\n'+'\n'.join(bad))
+          PY
+      - name: Install dependencies
+        working-directory: loopdeck/client
+        run: npm install --no-audit --no-fund
+      - name: Typecheck
+        working-directory: loopdeck/client
+        run: npm run typecheck
+      - name: Tests
+        working-directory: loopdeck/client
+        run: npm test
+      - name: Build
+        working-directory: loopdeck/client
+        run: npm run build
+      - name: Record transformed diff
+        if: always()
+        run: |
+          git status --short -- loopdeck/client > /tmp/status.txt
+          git diff -- loopdeck/client > /tmp/client.patch
+          tar -czf /tmp/loopdeck-client-refactored.tgz loopdeck/client
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: loopdeck-client-v6-refactored
+          path: |
+            /tmp/status.txt
+            /tmp/client.patch
+            /tmp/loopdeck-client-refactored.tgz
+          if-no-files-found: error
+          retention-days: 1
