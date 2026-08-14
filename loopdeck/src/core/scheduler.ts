@@ -1,9 +1,3 @@
-// RETIREMENT NOTICE — stage 4/12
-//
-// Adaptive grading was restored on main and is preserved here.
-// This stage retires only dynamic ease mutation: ratings may still be inferred as
-// hard/good/easy, but the stored ease value no longer moves after a review.
-
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
 const DEFAULT_EASE = 2.5;
@@ -101,6 +95,7 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
     next.totalWrong += 1;
     next.wrongStreak += 1;
     next.correctStreak = 0;
+    next.ease = clampEase(next.ease - 0.25);
     if (currentCard.state === 'review' || currentCard.state === 'mastered') next.lapseCount += 1;
     next.intervalDays = 0;
     next.dueAt = iso(addMinutes(now, AGAIN_DELAY_MINUTES));
@@ -109,6 +104,8 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
     next.totalCorrect += 1;
     next.correctStreak += 1;
     next.wrongStreak = 0;
+    if (rating === 'hard') next.ease = clampEase(next.ease - 0.15);
+    if (rating === 'easy') next.ease = clampEase(next.ease + 0.15);
     next.intervalDays = nextIntervalDays(currentCard.intervalDays, next.ease, rating);
     next.dueAt = iso(addDays(now, next.intervalDays));
     next.state = 'review';
