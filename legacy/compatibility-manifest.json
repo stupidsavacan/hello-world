@@ -1,0 +1,15 @@
+{
+  "status": "strategically indispensable, second edition",
+  "actualConsumers": 0,
+  "previousProposal": "closed after becoming stale",
+  "removalRisk": "emotionally significant but technically negligible",
+  "owners": ["nobody in particular"],
+  "reviewCadence": "whenever main moves again",
+  "migrationPlan": {
+    "phase1": "acknowledge legacy",
+    "phase2": "add compatibility layer",
+    "phase3": "watch compatibility layer become legacy",
+    "phase4": "reissue compatibility layer",
+    "phase5": "remove everything later"
+  }
+}
