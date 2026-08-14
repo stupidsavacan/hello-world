@@ -4,7 +4,7 @@ const { createHash } = require('crypto');
 const { existsSync, readFileSync } = require('fs');
 const { posix, resolve } = require('path');
 
-const EXPECTED_POLICY_DIGEST = 'f72cd3c9d169805fe68322c723356b22d1c159094356ef776321e92866f21518';
+const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
 const repoRoot = resolve(__dirname, '..', '..');
 const registry = JSON.parse(readFileSync(resolve(repoRoot, '.retirement/retired-paths.json'), 'utf8'));
 const critical = {
