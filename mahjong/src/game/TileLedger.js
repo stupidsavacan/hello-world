@@ -1,3 +1,9 @@
+// RETIREMENT NOTICE — stage 1/4
+//
+// TileLedger is scheduled for complete removal.
+// No runtime behavior changes in this stage.
+// Planned sequence: notice -> narrow accounting -> compatibility shell -> delete.
+
 (function attachTileLedger(global) {
   const Sanma = global.Sanma = global.Sanma || {};
 
