@@ -18,6 +18,8 @@ jobs:
           node-version: 22
       - name: Engine and replay E2E
         run: node mahjong/snapshot-tests/engine-e2e.test.js
+      - name: Replay hardening
+        run: node mahjong/snapshot-tests/replay-hardening.test.js
       - name: Browser bootstrap smoke
         run: node mahjong/snapshot-tests/browser-smoke.test.js
       - name: Product regressions
