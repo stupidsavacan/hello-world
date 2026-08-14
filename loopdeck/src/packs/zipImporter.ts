@@ -1,9 +1,8 @@
-// RETIREMENT NOTICE — stage 1/6
+// RETIREMENT NOTICE — stage 2/6
 //
-// LoopDeck's JSON/ZIP import path is scheduled for complete removal.
-// No runtime behavior changes in this stage.
-// Planned sequence: notice -> retire direct JSON import -> retire asset import ->
-// reduce ZIP import to compatibility -> disconnect callers -> delete importer.
+// Direct JSON import is retired in this stage. ZIP import remains operational.
+// Remaining sequence: retire asset import -> reduce ZIP import to compatibility ->
+// disconnect callers -> delete importer.
 
 import JSZip from 'jszip';
 import type { LoopDeckPack } from '../core/models';
@@ -38,7 +37,7 @@ export async function importLoopDeckZip(file: File): Promise<PackValidationResul
   return { ok: !issues.some((issue) => issue.level === 'error'), issues: [...issues, ...packResult.issues], pack: packResult.pack, assets };
 }
 export async function importLoopDeckJson(file: File): Promise<PackValidationResult> {
-  const issues = validateContainerFile(file); if (issues.some((issue) => issue.level === 'error')) return { ok: false, issues };
-  const packResult = validatePack(JSON.parse(await file.text()) as unknown); if (packResult.pack) stageImportedPackAssets(packResult.pack, []);
-  return { ok: packResult.ok && !issues.some((issue) => issue.level === 'error'), issues: [...issues, ...packResult.issues], pack: packResult.pack };
+  const issues = validateContainerFile(file);
+  issues.push({ level: 'error', message: 'Direct JSON import is retired.' });
+  return { ok: false, issues };
 }
