@@ -3,7 +3,102 @@ import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
 import type { LoopDeckPack } from '../src/core/models';
 import type { ImportedPackAsset } from '../src/packs/packTypes';
-import { createLoopDeckZipBytes, makePackFileStem, stringifyLoopDeckJson } from '../src/packs/zipExporter';
-const samplePack:LoopDeckPack={packVersion:1,packId:'sample-pack',title:'Sample Pack',folders:[{id:'folder-1',title:'Folder 1'}],modules:[{id:'module-1',folderId:'folder-1',title:'Module 1',subject:'sample',questionIds:['question-1']}],questions:[{id:'question-1',moduleId:'module-1',type:'input',prompt:'What is exported?',answer:'A LoopDeck pack'}]};
-function asset(path:string,dataUrl='data:image/png;base64,iVBORw0KGgo=',packId=samplePack.packId):ImportedPackAsset{return{packId,path,mimeType:'image/png',dataUrl};}
-describe('zip exporter',()=>{it('round-trips manifest modules and questions',async()=>{const bytes=await createLoopDeckZipBytes(samplePack);const zip=await JSZip.loadAsync(bytes);expect(JSON.parse(await zip.file('manifest.json')!.async('string'))).toMatchObject({packId:'sample-pack',title:'Sample Pack'});expect(JSON.parse(await zip.file('modules.json')!.async('string'))).toEqual(samplePack.modules);expect(JSON.parse(await zip.file('questions.json')!.async('string'))).toEqual(samplePack.questions);});it('includes safe referenced assets only',async()=>{const imagePack={...samplePack,questions:[{...samplePack.questions[0],imageAsset:'images/map.png'}]};const bytes=await createLoopDeckZipBytes(imagePack,[asset('images/map.png'),asset('images/unused.png')]);const zip=await JSZip.loadAsync(bytes);expect(zip.file('images/map.png')).not.toBeNull();expect(zip.file('images/unused.png')).toBeNull();});it('exports full pack JSON with trailing newline',()=>expect(stringifyLoopDeckJson(samplePack)).toBe(`${JSON.stringify(samplePack,null,2)}\n`));it('creates safe download file stems',()=>{expect(makePackFileStem({...samplePack,packId:'bad/name:*'})).toBe('bad-name');expect(makePackFileStem({...samplePack,packId:''})).toBe('Sample-Pack');});});
+import { createLoopDeckZipBlob, createLoopDeckZipBytes, makePackFileStem, stringifyLoopDeckJson } from '../src/packs/zipExporter';
+import { db } from '../src/storage/db';
+
+const samplePack: LoopDeckPack = {
+  packVersion: 1,
+  packId: 'sample-pack',
+  title: 'Sample Pack',
+  folders: [{ id: 'folder-1', title: 'Folder 1' }],
+  modules: [
+    {
+      id: 'module-1',
+      folderId: 'folder-1',
+      title: 'Module 1',
+      subject: 'sample',
+      questionIds: ['question-1']
+    }
+  ],
+  questions: [
+    {
+      id: 'question-1',
+      moduleId: 'module-1',
+      type: 'input',
+      prompt: 'What is exported?',
+      answer: 'A LoopDeck pack'
+    }
+  ]
+};
+
+function asset(path: string, dataUrl = 'data:image/png;base64,iVBORw0KGgo=', packId = samplePack.packId): ImportedPackAsset {
+  return { packId, path, mimeType: 'image/png', dataUrl };
+}
+
+function withImage(pack: LoopDeckPack = samplePack): LoopDeckPack {
+  return { ...pack, questions: [{ ...pack.questions[0], imageAsset: 'images/map.png' }] };
+}
+
+describe('zipExporter', () => {
+  it('creates import-compatible LoopDeck zip files', async () => {
+    const bytes = await createLoopDeckZipBytes(samplePack);
+    const zip = await JSZip.loadAsync(bytes);
+
+    expect(Object.keys(zip.files).sort()).toEqual(['manifest.json', 'modules.json', 'questions.json']);
+
+    const manifest = JSON.parse(await zip.file('manifest.json')!.async('string'));
+    const modules = JSON.parse(await zip.file('modules.json')!.async('string'));
+    const questions = JSON.parse(await zip.file('questions.json')!.async('string'));
+
+    expect(manifest).toEqual({
+      packVersion: 1,
+      packId: 'sample-pack',
+      title: 'Sample Pack',
+      folders: [{ id: 'folder-1', title: 'Folder 1' }]
+    });
+    expect(modules).toEqual(samplePack.modules);
+    expect(questions).toEqual(samplePack.questions);
+  });
+
+  it('includes safe stored assets referenced by questions', async () => {
+    const imagePack = withImage();
+    const bytes = await createLoopDeckZipBytes(imagePack, [asset('images/map.png'), asset('images/unreferenced.png')]);
+    const zip = await JSZip.loadAsync(bytes);
+
+    expect(zip.file('images/map.png')).not.toBeNull();
+    expect(await zip.file('images/map.png')!.async('base64')).toBe('iVBORw0KGgo=');
+    expect(zip.file('images/unreferenced.png')).toBeNull();
+  });
+
+  it('includes persisted assets in the ZIP export used by the UI', async () => {
+    const storedPack = withImage({ ...samplePack, packId: 'stored-export-pack' });
+    await db.deleteImportedPack(storedPack.packId);
+    await db.saveImportedPackWithAssets(storedPack, [asset('images/map.png', 'data:image/png;base64,c3RvcmVk', storedPack.packId)]);
+
+    const blob = await createLoopDeckZipBlob(storedPack);
+    const zip = await JSZip.loadAsync(await blob.arrayBuffer());
+
+    expect(await zip.file('images/map.png')!.async('base64')).toBe('c3RvcmVk');
+    await db.deleteImportedPack(storedPack.packId);
+  });
+
+  it('does not export unsafe or active asset references', async () => {
+    const unsafePack: LoopDeckPack = {
+      ...samplePack,
+      questions: [{ ...samplePack.questions[0], imageAsset: '../evil.png' }]
+    };
+    const bytes = await createLoopDeckZipBytes(unsafePack, [asset('../evil.png')]);
+    const zip = await JSZip.loadAsync(bytes);
+
+    expect(Object.keys(zip.files).sort()).toEqual(['manifest.json', 'modules.json', 'questions.json']);
+  });
+
+  it('exports full pack JSON with a trailing newline', () => {
+    expect(stringifyLoopDeckJson(samplePack)).toBe(`${JSON.stringify(samplePack, null, 2)}\n`);
+  });
+
+  it('creates safe download file stems', () => {
+    expect(makePackFileStem({ ...samplePack, packId: 'bad/name:*' })).toBe('bad-name');
+    expect(makePackFileStem({ ...samplePack, packId: '' })).toBe('Sample-Pack');
+  });
+});
