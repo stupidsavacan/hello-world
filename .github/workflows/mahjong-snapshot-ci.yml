@@ -1,0 +1,22 @@
+name: Mahjong Snapshot CI
+
+on:
+  push:
+    branches:
+      - agent/mahjong-canonical-modern-snapshot-0315
+
+permissions:
+  contents: read
+
+jobs:
+  playable-snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Engine and replay E2E
+        run: node mahjong/snapshot-tests/engine-e2e.test.js
+      - name: Browser bootstrap smoke
+        run: node mahjong/snapshot-tests/browser-smoke.test.js
