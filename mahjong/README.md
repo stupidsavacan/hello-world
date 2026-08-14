@@ -40,12 +40,26 @@ http://localhost:8000/mahjong/
 
 旧compact engineの互換shim（`FlowCompat.js` / `GameEngine.part1–3.js`）は実行グラフから未使用であることを確認し、clean snapshotでは削除しています。実行経路はcanonical flow 1系統です。
 
+## 牌譜互換の追加修正
+
+ReplayViewer は canonical event を次の形まで再構築します。
+
+- ポン/チー後に鳴かれた牌を元の河から除去
+- `minkan` / `ankan` / `kakan` の `kanType`・公開状態・元プレイヤー・4枚構成を保持
+- `score_settlement.changes` を流局後の点棒へ反映
+- `double_ron.changes` をダブロン後の点棒へ反映
+
 ## 検証
 
-このブランチ専用の **Mahjong Snapshot CI** は18系統の検証を実行します。
+このブランチ専用の **Mahjong Snapshot CI** は現在24系統を検証します。
 
 - 固定seedの東風戦E2E
+- Replay hardening（ポン/カン/流局精算/ダブロン）
 - `mahjong/index.html` の実script順によるbrowser bootstrap
+- GameEngine公開APIとcanonical flow module境界
+- CPUカン→嶺上ツモ
+- 山0で大明槓を禁止し、山ありでは正常に嶺上牌を取得
+- Recoveryがpending CPUロン/槍槓候補を通常経路へ保持
 - SVG牌表示
 - 牌譜リプレイ本体とUI bootstrap
 - 設定export/importとUI bootstrap
@@ -56,9 +70,9 @@ http://localhost:8000/mahjong/
 
 E2Eでは TileLedger の整合性、CPU伏せ手の非公開、GameEngine主要公開API、鳴き後の牌譜再構築も検査します。
 
-clean runtime確認済み head: `d80b8aab068a9757f18cbb51a3d8fda82c4bef63`
+24系統完全green確認: `d6d4b12ebf2c862e5e6b9945e369550dd639d7cb`
 
-このheadでは **Engine/replay E2E、Browser bootstrap smoke、Product regressions の全ステップがGitHub Actions上で success** になっています。
+保存点: `checkpoint/mahjong-canonical-modern-deep-ci-2026-08-15`
 
 ## main との関係
 
