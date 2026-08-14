@@ -1,50 +1,24 @@
-// RETIREMENT NOTICE — stage 2/4
+// RETIREMENT NOTICE — stage 3/4
 //
-// Built-in JSON chunks are still assembled, but normalization and validation
-// have been retired. The loader now returns the assembled source pack directly.
-// Remaining sequence: empty compatibility shelf -> delete.
+// The built-in loader no longer reads metadata or question JSON files.
+// It survives only as an empty compatibility shelf until stage 4 deletes it.
 
-import builtinMeta from '../../data/builtin/meta.json';
-import type { LoopDeckPack, Question } from '../core/models';
+import type { LoopDeckPack } from '../core/models';
 
-type QuestionChunk = Question[];
-type BuiltinMeta = Omit<LoopDeckPack, 'questions'>;
-
-const chunkModules = import.meta.glob('../../data/builtin/questions/*.json', {
-  eager: true,
-  import: 'default'
-}) as Record<string, QuestionChunk>;
-
-function sourcePackFromChunks(): LoopDeckPack {
-  const meta = builtinMeta as unknown as BuiltinMeta;
-  const allQuestions = Object.entries(chunkModules)
-    .sort(([left], [right]) => left.localeCompare(right))
-    .flatMap(([, chunk]) => chunk);
-  const questions = meta.modules.flatMap((module) =>
-    allQuestions.filter((question) => question.moduleId === module.id)
-  );
-
-  const questionIdsByModule = new Map<string, string[]>();
-  for (const question of questions) {
-    const ids = questionIdsByModule.get(question.moduleId) ?? [];
-    ids.push(question.id);
-    questionIdsByModule.set(question.moduleId, ids);
-  }
-
-  return {
-    ...meta,
-    modules: meta.modules.map((module) => ({
-      ...module,
-      questionIds: questionIdsByModule.get(module.id) ?? []
-    })),
-    questions
-  };
-}
+const EMPTY_BUILTIN_PACK: LoopDeckPack = {
+  packVersion: 1,
+  packId: 'retired-builtin-pack',
+  title: 'Retired built-in pack',
+  description: 'Compatibility placeholder pending deletion.',
+  folders: [],
+  modules: [],
+  questions: []
+};
 
 export function loadBuiltinPacks(): LoopDeckPack[] {
-  return [sourcePackFromChunks()];
+  return [EMPTY_BUILTIN_PACK];
 }
 
 export function getBuiltinSourcePackForTesting(): LoopDeckPack {
-  return sourcePackFromChunks();
+  return EMPTY_BUILTIN_PACK;
 }
