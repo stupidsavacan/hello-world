@@ -1,3 +1,10 @@
+// RETIREMENT NOTICE — stage 1/6
+//
+// LoopDeck's JSON/ZIP import path is scheduled for complete removal.
+// No runtime behavior changes in this stage.
+// Planned sequence: notice -> retire direct JSON import -> retire asset import ->
+// reduce ZIP import to compatibility -> disconnect callers -> delete importer.
+
 import JSZip from 'jszip';
 import type { LoopDeckPack } from '../core/models';
 import { extensionOf, isSafeImageAssetRef } from './assetSafety';
