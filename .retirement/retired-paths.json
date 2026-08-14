@@ -1,7 +1,7 @@
 {
-  "policy": "README-only end state: once a path or module contract completes retirement, ordinary pull requests must not resurrect it under the same file, another extension, a directory module, or a renamed contract.",
+  "policy": "LoopDeck paths listed here remain retired. Mahjong is an active product namespace and its runtime contracts are not retired.",
   "requiredCheckContext": "Retirement Guard / retirement-policy",
-  "policyDigest": "37243f8838a016c7a53d5e4605b946f3c75b571854cbe5ce5c5b25da54baa76f",
+  "policyDigest": "f72699a846a905d4e5062623bb231ea5c2d235b9cf48c71bc393f7b6abf06115",
   "retiredPaths": [
     "loopdeck/.gitignore",
     "loopdeck/src/core/analyticsEngine.ts",
@@ -22,21 +22,7 @@
     "loopdeck/tests/builtinDataIntegrity.test.ts",
     "loopdeck/tests/choiceDatasetAudit.test.ts",
     "loopdeck/tests/zipImporter.test.ts",
-    "loopdeck/tests/zipImporterAssets.test.ts",
-    "mahjong/src/game/ActionResolver.js",
-    "mahjong/src/game/AssistManager.js",
-    "mahjong/src/game/CallResolver.js",
-    "mahjong/src/game/CallWindow.js",
-    "mahjong/src/game/CpuStrategy.js",
-    "mahjong/src/game/CpuVisibleTiles.js",
-    "mahjong/src/game/DoraCalculator.js",
-    "mahjong/src/game/FuritenManager.js",
-    "mahjong/src/game/GameRecord.js",
-    "mahjong/src/game/InvariantChecker.js",
-    "mahjong/src/game/RecoveryManager.js",
-    "mahjong/src/game/RuleConfig.js",
-    "mahjong/src/game/TileLedger.js",
-    "mahjong/src/game/GameEngine.js"
+    "loopdeck/tests/zipImporterAssets.test.ts"
   ],
   "retiredModuleRoots": [
     "loopdeck/src/core/analyticsEngine",
@@ -52,21 +38,7 @@
     "loopdeck/src/pdf/worksheetPdf",
     "loopdeck/src/storage/db",
     "loopdeck/src/styles",
-    "loopdeck/src/main",
-    "mahjong/src/game/ActionResolver",
-    "mahjong/src/game/AssistManager",
-    "mahjong/src/game/CallResolver",
-    "mahjong/src/game/CallWindow",
-    "mahjong/src/game/CpuStrategy",
-    "mahjong/src/game/CpuVisibleTiles",
-    "mahjong/src/game/DoraCalculator",
-    "mahjong/src/game/FuritenManager",
-    "mahjong/src/game/GameRecord",
-    "mahjong/src/game/InvariantChecker",
-    "mahjong/src/game/RecoveryManager",
-    "mahjong/src/game/RuleConfig",
-    "mahjong/src/game/TileLedger",
-    "mahjong/src/game/GameEngine"
+    "loopdeck/src/main"
   ],
   "retiredContractMarkers": [
     "loadBuiltinPacks",
@@ -76,21 +48,7 @@
     "createReviewCard",
     "applyReviewRating",
     "inferReviewRating",
-    "reviewCardsForState",
-    "Sanma.ActionResolver",
-    "Sanma.AssistManager",
-    "Sanma.CallResolver",
-    "Sanma.CallWindow",
-    "Sanma.CpuStrategy",
-    "Sanma.CpuVisibleTiles",
-    "Sanma.DoraCalculator",
-    "Sanma.FuritenManager",
-    "Sanma.GameRecord",
-    "Sanma.InvariantChecker",
-    "Sanma.RecoveryManager",
-    "Sanma.RuleConfig",
-    "Sanma.TileLedger",
-    "Sanma.GameEngine"
+    "reviewCardsForState"
   ],
   "guardPaths": [
     ".retirement/retired-paths.json",
