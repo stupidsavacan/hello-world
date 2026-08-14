@@ -1,14 +1,24 @@
-// RETIREMENT NOTICE — stage 1/5
+// RETIREMENT NOTICE — stage 2/12
 //
-// This scheduler remains fully active in this stage. No runtime behavior changes here.
-// Its retirement will be deliberately paced behind ongoing implementation elsewhere:
+// Scheduler retirement has been expanded from five stages to twelve because this file
+// is large enough to deserve a needlessly careful dismantling. Runtime behavior is
+// still unchanged in this stage; only the retirement contract is being made explicit.
+//
+// Planned sequence:
 // 1. announce retirement
-// 2. narrow scheduling policy while preserving the public surface
-// 3. reduce to compatibility-only queueing
-// 4. leave a tombstone
-// 5. delete the file
+// 2. expand the retirement plan and freeze the public surface
+// 3. remove adaptive answer-speed grading
+// 4. flatten ease adjustments
+// 5. simplify interval growth
+// 6. retire leech promotion
+// 7. retire mastered promotion
+// 8. collapse bucket distinctions
+// 9. flatten queue priority
+// 10. reduce schedule summaries
+// 11. leave a compatibility shell / tombstone
+// 12. delete the file
 //
-// Later stages are intentionally deferred rather than bundled into this change.
+// No new exports should be added after this point.
 
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
