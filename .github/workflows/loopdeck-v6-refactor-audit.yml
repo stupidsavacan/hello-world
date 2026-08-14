@@ -38,13 +38,18 @@ jobs:
               ('scheduler', 'planner'),
               ('review', 'practice'),
           ]
-          suffixes = {'.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs', '.css', '.html', '.json'}
+          code_suffixes = {'.ts', '.tsx', '.js', '.jsx', '.mjs', '.cjs'}
           for path in root.rglob('*'):
-              if not path.is_file() or path.suffix not in suffixes:
+              if not path.is_file() or path.suffix not in code_suffixes:
                   continue
               text = path.read_text(encoding='utf-8')
               for old, new in replacements:
                   text = text.replace(old, new)
+              path.write_text(text, encoding='utf-8')
+
+          # CSS selectors/classes must track the practice route, but product copy and canonical data stay untouched.
+          for path in root.rglob('*.css'):
+              text = path.read_text(encoding='utf-8').replace('review', 'practice')
               path.write_text(text, encoding='utf-8')
 
           renames = {
@@ -71,11 +76,6 @@ jobs:
               text = text.replace("'../mahjong/tests/retirement-sentry.test.js'", "'../../mahjong/tests/retirement-sentry.test.js'")
               native.write_text(text, encoding='utf-8')
 
-          index = root / 'index.html'
-          if index.exists():
-              text = index.read_text(encoding='utf-8').replace('/src/main.ts', '/client/src/main.ts')
-              index.write_text(text, encoding='utf-8')
-
           pkg = root / 'package.json'
           if pkg.exists():
               text = pkg.read_text(encoding='utf-8')
@@ -90,7 +90,7 @@ jobs:
           ]
           bad=[]
           for path in root.rglob('*'):
-              if path.is_file() and path.suffix in {'.ts','.tsx','.js','.jsx','.mjs','.cjs'}:
+              if path.is_file() and path.suffix in code_suffixes:
                   text=path.read_text(encoding='utf-8')
                   for marker in banned:
                       if marker in text: bad.append(f'{path}:{marker}')
@@ -114,7 +114,7 @@ jobs:
         run: |
           git status --short -- loopdeck/client > /tmp/status.txt
           git diff -- loopdeck/client > /tmp/client.patch
-          tar -czf /tmp/loopdeck-client-refactored.tgz loopdeck/client
+          tar --exclude='loopdeck/client/node_modules' --exclude='loopdeck/client/dist' -czf /tmp/loopdeck-client-refactored.tgz loopdeck/client
       - uses: actions/upload-artifact@v4
         if: always()
         with:
