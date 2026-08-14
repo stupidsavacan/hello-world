@@ -27,7 +27,7 @@ jobs:
               ('importLoopDeckZip', 'importPackArchive'),
               ('importLoopDeckJson', 'importPackJson'),
               ('loadBuiltinPacks', 'loadBuiltinCatalog'),
-              ('validatePack', 'validatePackPayload'),
+              ('validatePack', 'checkPackPayload'),
               ('createReviewCard', 'createPracticeCard'),
               ('applyReviewRating', 'applyPracticeRating'),
               ('inferReviewRating', 'inferPracticeRating'),
@@ -59,11 +59,9 @@ jobs:
                   new.parent.mkdir(parents=True, exist_ok=True)
                   old.rename(new)
 
-          # The copied product tree must not carry a second retirement witness.
           copied_sentry = root / 'tests/retirementSentry.test.mjs'
           if copied_sentry.exists(): copied_sentry.unlink()
 
-          # The client-root test now sits one directory deeper than the original product root.
           native = root / 'tests/nativeSaveResult.test.ts'
           if native.exists():
               text = native.read_text(encoding='utf-8')
@@ -73,13 +71,11 @@ jobs:
               text = text.replace("'../mahjong/tests/retirement-sentry.test.js'", "'../../mahjong/tests/retirement-sentry.test.js'")
               native.write_text(text, encoding='utf-8')
 
-          # Update entry/config roots for the nested client app.
           index = root / 'index.html'
           if index.exists():
               text = index.read_text(encoding='utf-8').replace('/src/main.ts', '/client/src/main.ts')
               index.write_text(text, encoding='utf-8')
 
-          # The old package exclusion refers to the removed copied sentry.
           pkg = root / 'package.json'
           if pkg.exists():
               text = pkg.read_text(encoding='utf-8')
