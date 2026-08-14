@@ -15,8 +15,8 @@ global.window = global;
 global.Sanma = {};
 [
   '../loopdeck/foreign/mahjong/RuleConfig.js',
-  'src/game/Tile.js',
-  'src/game/SeedPolicy.js',
+  '../loopdeck/foreign/mahjong/Tile.js',
+  '../loopdeck/foreign/mahjong/SeedPolicy.js',
   'src/game/Wall.js',
   'src/game/Player.js',
 ].forEach(load);
