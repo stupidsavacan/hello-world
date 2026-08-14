@@ -1,0 +1,82 @@
+name: Retirement Guard
+
+on:
+  pull_request:
+  pull_request_target:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  current-tree:
+    if: github.event_name != 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify retired paths stay absent and sentries stay present
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const registry = JSON.parse(fs.readFileSync('.retirement/retired-paths.json', 'utf8'));
+          const resurrected = registry.retiredPaths.filter((path) => fs.existsSync(path));
+          const missingGuards = registry.guardPaths.filter((path) => !fs.existsSync(path));
+          if (resurrected.length || missingGuards.length) {
+            console.error('README-only retirement policy failed.');
+            if (resurrected.length) console.error('Resurrected paths:', resurrected.join(', '));
+            if (missingGuards.length) console.error('Missing guard paths:', missingGuards.join(', '));
+            process.exit(1);
+          }
+          console.log('Retirement registry clean; all sentries present.');
+          NODE
+      - name: Run LoopDeck sentry
+        working-directory: loopdeck
+        run: node tests/retirementSentry.test.mjs
+      - name: Run Mahjong sentry
+        run: node mahjong/tests/retirement-sentry.test.js
+
+  pull-request-history-guard:
+    if: github.event_name == 'pull_request_target'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Reject retired-path resurrection and sentry tampering
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const baseRef = context.payload.repository.default_branch;
+            const registryResponse = await github.rest.repos.getContent({
+              owner,
+              repo,
+              path: '.retirement/retired-paths.json',
+              ref: baseRef,
+            });
+            if (Array.isArray(registryResponse.data) || !registryResponse.data.content) {
+              core.setFailed('Retirement registry is unavailable on the base branch.');
+              return;
+            }
+            const registry = JSON.parse(Buffer.from(registryResponse.data.content, 'base64').toString('utf8'));
+            const retired = new Set(registry.retiredPaths || []);
+            const guards = new Set(registry.guardPaths || []);
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: context.payload.pull_request.number,
+              per_page: 100,
+            });
+            const resurrected = files.filter((file) => retired.has(file.filename) && file.status !== 'removed');
+            const guardChanges = files.filter((file) => guards.has(file.filename));
+            if (resurrected.length) {
+              core.error(`Retired paths were reintroduced: ${resurrected.map((file) => file.filename).join(', ')}`);
+            }
+            if (guardChanges.length) {
+              core.error(`Retirement sentries were changed by the PR: ${guardChanges.map((file) => file.filename).join(', ')}`);
+            }
+            if (resurrected.length || guardChanges.length) {
+              core.setFailed('Old PR/commit restoration is blocked by the base-branch retirement policy.');
+            }
