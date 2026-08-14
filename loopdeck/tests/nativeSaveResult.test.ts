@@ -1,6 +1,22 @@
 // @vitest-environment jsdom
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { waitForNativeSave } from '../src/screens/pdfWorksheetScreen';
+
+const retirementGuards = [
+  '../.retirement/retired-paths.json',
+  '../.github/workflows/retirement-guard.yml',
+  'tests/retirementSentry.test.mjs',
+  '../mahjong/tests/retirement-sentry.test.js'
+];
+
+describe('retirement sentry continuity', () => {
+  it('keeps the retirement registry, workflow, and both sentries present', () => {
+    const missing = retirementGuards.filter((file) => !existsSync(resolve(process.cwd(), file)));
+    expect(missing, `retirement guards disappeared: ${missing.join(', ')}`).toEqual([]);
+  });
+});
 
 afterEach(() => {
   vi.useRealTimers();
