@@ -1,17 +1,37 @@
-// RETIREMENT NOTICE — stage 2/4
+// RETIREMENT NOTICE — stage 3/4
 //
-// The helper may still inspect state and identify a candidate swap, but it no longer
-// mutates a hand, the wall, lastDraw, or assist usage. Runtime intervention is retired.
-// Remaining sequence: compatibility shell -> delete.
+// Compatibility shell only. No state inspection, candidate search, randomness,
+// or mutation remains. The namespace survives for callers until stage 4 deletes it.
 
 (function attachAssistManager(global){
   const Sanma=global.Sanma=global.Sanma||{};
-  function ids(state){const out=[],wall=state&&state.wall;['tiles','deadWall'].forEach(k=>(wall&&Array.isArray(wall[k])?wall[k]:[]).forEach(t=>t&&t.instanceId&&out.push(t.instanceId)));(state&&Array.isArray(state.players)?state.players:[]).forEach(p=>{['hand','discards','kitaTiles'].forEach(k=>(p&&Array.isArray(p[k])?p[k]:[]).forEach(t=>t&&t.instanceId&&out.push(t.instanceId)));(p&&Array.isArray(p.melds)?p.melds:[]).forEach(m=>(m&&Array.isArray(m.tiles)?m.tiles:[]).forEach(t=>t&&t.instanceId&&out.push(t.instanceId)));});return out;}
-  function integrity(state){const all=ids(state),seen=new Set(),dups=[];all.forEach(id=>{if(seen.has(id))dups.push(id);seen.add(id);});return{tileCount:all.length,duplicateInstanceIds:dups,valid:dups.length===0};}
-  function rate(rule,phase,player){if(phase==='opening')return Number(rule.dramaticOpeningHandRate)||0;if(phase!=='draw'||rule.dramaticDrawAssist!==true)return 0;return player&&player.isHuman?Number(rule.dramaticDrawAssistRate)||0:Number(rule.cpuDramaticDrawAssistRate)||0;}
-  function allowed(state,rule,phase,p){const usage=state&&state.assistUsage||{},draws=usage.drawsByPlayer||{};if(phase==='opening')return Number(usage.opening||0)<1;const used=Number(draws[p.id])||0,limit=p.isHuman?Number(rule.maxAssistDrawsPerRoundForHuman)||0:Number(rule.maxAssistDrawsPerRoundForCpu)||0;return used<limit;}
-  function shanten(p,hand,rule){return Sanma.CpuStrategy.estimateShanten({tiles:hand,ruleConfig:rule,openMeldCount:Array.isArray(p.melds)?p.melds.length:0});}
-  function findSwap(state,p,phase,rule){if(!p||!Array.isArray(p.hand)||!state.wall||!Array.isArray(state.wall.tiles)||!p.hand.length||!state.wall.tiles.length)return null;let handIndices;if(phase==='draw'){const i=p.lastDraw?p.hand.findIndex(t=>t.instanceId===p.lastDraw.instanceId):-1;if(i<0)return null;handIndices=[i];}else{const discard=Sanma.CpuStrategy.chooseDiscard({player:p,ruleConfig:rule,random:()=>0}),i=p.hand.findIndex(t=>t.instanceId===discard.tileInstanceId);handIndices=i>=0?[i]:[];}const before=shanten(p,p.hand,rule);let best=null;handIndices.forEach(hi=>state.wall.tiles.forEach((incoming,wi)=>{const sim=p.hand.slice();sim[hi]=incoming;const after=shanten(p,sim,rule);if(after>=before)return;if(!best||after<best.afterShanten||(after===best.afterShanten&&String(incoming.instanceId).localeCompare(String(best.incoming.instanceId))<0))best={handIndex:hi,wallIndex:wi,outgoing:p.hand[hi],incoming,beforeShanten:before,afterShanten:after};}));return best;}
-  function evaluate(input){const o=input||{},state=o.state||{},rule=o.ruleConfig||state.ruleConfig||{},p=o.player||null,phase=o.phase||'draw',before=integrity(state),enabled=rule.dramaticLuckAssist===true&&rate(rule,phase,p)>0,random=typeof o.random==='function'?o.random:Math.random,r=enabled?rate(rule,phase,p):0,roll=enabled?random():null,ok=Boolean(enabled&&p&&allowed(state,rule,phase,p)),condition=ok&&roll<r,swap=condition?findSwap(state,p,phase,rule):null,after=integrity(state);let reason='補助設定が無効です。';if(enabled&&!ok)reason='この局の補助回数上限に達しています。';else if(ok&&!condition)reason='補助条件に達しませんでした。';else if(condition&&!swap)reason='手牌を改善する安全な交換候補がありません。';else if(swap)reason=`退役処理により交換は実行しません。候補シャンテン ${swap.beforeShanten} → ${swap.afterShanten}`;return{type:'assist',phase,playerIndex:p&&Number.isInteger(p.id)?p.id:null,enabled,applied:false,rate:r,roll,reason,beforeShanten:swap?swap.beforeShanten:null,afterShanten:swap?swap.afterShanten:null,outgoing:swap?swap.outgoing:null,incoming:swap?swap.incoming:null,tileCountIntegrityChecked:true,beforeTileCount:before.tileCount,afterTileCount:after.tileCount,duplicateInstanceIds:after.duplicateInstanceIds,integrityValid:before.valid&&after.valid&&before.tileCount===after.tileCount};}
-  Sanma.AssistManager={evaluate,evaluateOpening:i=>evaluate(Object.assign({},i||{},{phase:'opening'})),evaluateDraw:i=>evaluate(Object.assign({},i||{},{phase:'draw'})),tileIntegrity:integrity,findSwap};
+  function result(input){
+    const o=input||{},p=o.player||null,phase=o.phase||'draw';
+    return {
+      type:'assist',
+      phase,
+      playerIndex:p&&Number.isInteger(p.id)?p.id:null,
+      enabled:false,
+      applied:false,
+      rate:0,
+      roll:null,
+      reason:'AssistManager is retired and retained only as a compatibility shell.',
+      beforeShanten:null,
+      afterShanten:null,
+      outgoing:null,
+      incoming:null,
+      tileCountIntegrityChecked:false,
+      beforeTileCount:null,
+      afterTileCount:null,
+      duplicateInstanceIds:[],
+      integrityValid:true
+    };
+  }
+  Sanma.AssistManager={
+    evaluate:result,
+    evaluateOpening:i=>result(Object.assign({},i||{},{phase:'opening'})),
+    evaluateDraw:i=>result(Object.assign({},i||{},{phase:'draw'})),
+    tileIntegrity:()=>({tileCount:0,duplicateInstanceIds:[],valid:true}),
+    findSwap:()=>null
+  };
 })(window);
