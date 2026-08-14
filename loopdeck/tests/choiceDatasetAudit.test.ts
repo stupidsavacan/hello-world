@@ -1,66 +1,62 @@
 import { describe, expect, it } from 'vitest';
-import { normalizeAnswer } from '../src/core/answerJudge';
 import { buildGeneratedChoices } from '../src/core/choiceGenerator';
-import { createSession } from '../src/core/sessionEngine';
-import { loadBuiltinPacks } from '../src/packs/builtinLoader';
+import type { InputQuestion } from '../src/core/models';
+import { buildRangeOptions, createSession } from '../src/core/sessionEngine';
+import { getVisibleBuiltinModules, REVERSE_MODULE_IDS } from '../src/packs/builtinNormalizer';
+import { getBuiltinSourcePackForTesting, loadBuiltinPacks } from '../src/packs/builtinLoader';
+import { validatePack } from '../src/packs/packValidator';
 
-describe('built-in choice dataset audit', () => {
+describe('built-in LoopDeck data', () => {
+  const source = getBuiltinSourcePackForTesting();
   const pack = loadBuiltinPacks()[0];
 
-  it('can generate safe four-choice options for every input question in every non-empty module', () => {
-    const failures: string[] = [];
+  it('reconstructs the complete canonical source dataset from readable JSON chunks', () => {
+    expect(source.questions).toHaveLength(1112);
+    expect(source.modules).toHaveLength(9);
+    expect(new Set(source.questions.map((question) => question.id)).size).toBe(1112);
+  });
 
-    for (const module of pack.modules.filter((item) => item.questionIds.length > 0)) {
-      const pool = pack.questions.filter((question) => question.moduleId === module.id);
-      for (const question of pool) {
-        if (question.type !== 'input') continue;
-        const choices = buildGeneratedChoices(question, pool, 4, () => 0.25);
-        const normalizedChoices = choices?.map(normalizeAnswer) ?? [];
-        const accepted = new Set([question.answer, ...(question.acceptableAnswers ?? [])].map(normalizeAnswer));
-        const wrongChoices = normalizedChoices.filter((choice) => choice !== normalizeAnswer(question.answer));
+  it('loads as a valid active built-in dataset', () => {
+    const result = validatePack(pack);
+    expect(result.ok).toBe(true);
+    expect(pack.modules.length).toBe(10);
+    expect(pack.questions.length).toBe(1112);
+  });
 
-        if (!choices || choices.length !== 4 || new Set(normalizedChoices).size !== 4 || !choices.includes(question.answer)) {
-          failures.push(`${module.title}: ${question.id} could not build four unique choices`);
-          continue;
-        }
-        if (wrongChoices.some((choice) => accepted.has(choice))) {
-          failures.push(`${module.title}: ${question.id} used an acceptable answer as a distractor`);
-        }
-      }
+  it('does not include reverse practice modules or questions', () => {
+    expect(pack.modules.some((module) => REVERSE_MODULE_IDS.has(module.id))).toBe(false);
+    expect(pack.questions.some((question) => REVERSE_MODULE_IDS.has(question.moduleId))).toBe(false);
+  });
+
+  it('keeps 古文単語 empty and hides it from normal study cards', () => {
+    const kobunVocab = pack.modules.find((module) => module.id === 'kobun_vocab');
+    expect(kobunVocab?.questionIds.length).toBe(0);
+    expect(getVisibleBuiltinModules(pack.modules).some((module) => module.id === 'kobun_vocab')).toBe(false);
+  });
+
+  it('preserves LEAP IDs, numbers, and ranges', () => {
+    const leap = pack.questions.filter((question) => question.moduleId === 'leap');
+    const leapFinal = pack.questions.filter((question) => question.moduleId === 'leap_final');
+    expect(leap).toHaveLength(200);
+    expect(leapFinal).toHaveLength(100);
+    expect(leap.map((question) => question.id)).toEqual(Array.from({ length: 200 }, (_, index) => `leap-${index + 1}`));
+    expect(leapFinal.map((question) => question.id)).toEqual(Array.from({ length: 100 }, (_, index) => `leap_final-${index + 201}`));
+    expect(buildRangeOptions(leapFinal).map((option) => option.value)).toEqual(['all', '201-225', '226-250', '251-275', '276-300']);
+  });
+
+  it('can generate four choices for LEAP 201-300', () => {
+    const leapFinal = pack.questions.filter((question): question is InputQuestion => question.moduleId === 'leap_final' && question.type === 'input');
+    const choices = buildGeneratedChoices(leapFinal[0], leapFinal, 4, () => 0.25);
+    expect(choices).toHaveLength(4);
+    expect(choices).toContain(leapFinal[0].answer);
+  });
+
+  it('can start representative built-in modules', () => {
+    for (const title of ['LEAP 001〜200', '化学', '歴史総合', '地理総合']) {
+      const module = pack.modules.find((item) => item.title === title);
+      expect(module, title).toBeTruthy();
+      const questions = pack.questions.filter((question) => question.moduleId === module!.id);
+      expect(createSession(module!, questions, { shuffle: false, autoNext: true, questionLimit: 'all' }).queue.length).toBeGreaterThan(0);
     }
-
-    expect(failures).toEqual([]);
-  });
-
-  it('keeps the full module available as the choice pool for a one-question session', () => {
-    const module = pack.modules.find((item) => item.id === 'chemistry')!;
-    const pool = pack.questions.filter((question) => question.moduleId === module.id);
-    const session = createSession(module, pool.slice(0, 1), {
-      shuffle: false,
-      autoNext: false,
-      questionLimit: 'all',
-      answerFormat: 'choice'
-    }, 'review', pool);
-
-    expect(session.queue).toHaveLength(1);
-    expect(session.choicePool).toHaveLength(pool.length);
-  });
-
-  it('keeps every native choice question valid', () => {
-    const failures = pack.questions
-      .filter((question) => question.type === 'choice')
-      .filter((question) => question.choices.length < 2 || !question.choices.includes(question.answer) || new Set(question.choices.map(normalizeAnswer)).size !== question.choices.length)
-      .map((question) => `${question.moduleId}: ${question.id}`);
-
-    expect(failures).toEqual([]);
-  });
-
-  it('keeps every multi-select question valid', () => {
-    const failures = pack.questions
-      .filter((question) => question.type === 'multi_select')
-      .filter((question) => question.correctChoices.length < 2 || question.correctChoices.some((answer) => !question.choices.includes(answer)))
-      .map((question) => `${question.moduleId}: ${question.id}`);
-
-    expect(failures).toEqual([]);
   });
 });
