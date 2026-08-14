@@ -1,8 +1,8 @@
-// RETIREMENT NOTICE — stage 4/12
+// RETIREMENT NOTICE — stage 5/12
 //
-// Adaptive grading was restored on main and is preserved here.
-// This stage retires only dynamic ease mutation: ratings may still be inferred as
-// hard/good/easy, but the stored ease value no longer moves after a review.
+// Interval growth no longer depends on each card's stored ease value.
+// Rating categories remain, but they now use fixed multipliers so interval policy is
+// deterministic across cards while the rest of the scheduler remains intact.
 
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
@@ -75,10 +75,10 @@ export function createReviewCard(questionId: string, moduleId: string, now = new
   };
 }
 
-function nextIntervalDays(previousIntervalDays: number, ease: number, rating: ReviewRating): number {
-  if (rating === 'hard') return Math.max(1, Math.ceil(previousIntervalDays * 1.2));
-  if (rating === 'good') return Math.max(1, Math.ceil(previousIntervalDays === 0 ? 1 : previousIntervalDays * ease));
-  if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * ease * 1.3));
+function nextIntervalDays(previousIntervalDays: number, _ease: number, rating: ReviewRating): number {
+  if (rating === 'hard') return Math.max(1, Math.ceil(previousIntervalDays === 0 ? 1 : previousIntervalDays * 1.25));
+  if (rating === 'good') return Math.max(1, Math.ceil(previousIntervalDays === 0 ? 1 : previousIntervalDays * 2.5));
+  if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * 3.25));
   return 0;
 }
 function isLeech(card: ReviewCard): boolean { return card.lapseCount >= 3 || card.totalWrong >= 5 || card.wrongStreak >= 3; }
