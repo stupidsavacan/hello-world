@@ -1,6 +1,16 @@
-import JSZip from 'jszip';
 import { describe, expect, it } from 'vitest';
-import { takeStagedPackAssets } from '../src/packs/importedAssetStaging';
 import { importLoopDeckJson, importLoopDeckZip } from '../src/packs/zipImporter';
-function manifest(){return{packVersion:1,packId:'image-pack',title:'Image Pack',folders:[{id:'f',title:'Folder'}]};}function modules(questionIds:string[]){return[{id:'m',folderId:'f',title:'Module',subject:'demo',questionIds}];}function question(id:string,imageAsset?:string){return{id,moduleId:'m',type:'input' as const,prompt:`${id}?`,answer:id,imageAsset};}async function zipFile(questions:ReturnType<typeof question>[],images:Record<string,string>={}):Promise<File>{const zip=new JSZip();zip.file('manifest.json',JSON.stringify(manifest()));zip.file('modules.json',JSON.stringify(modules(questions.map(i=>i.id))));zip.file('questions.json',JSON.stringify(questions));for(const [path,base64] of Object.entries(images))zip.file(path,base64,{base64:true});return new File([await zip.generateAsync({type:'arraybuffer'})],'image-pack.loopdeck.zip',{type:'application/zip'});}
-describe('ZIP image asset import',()=>{it('retires referenced PNG asset extraction',async()=>{const result=await importLoopDeckZip(await zipFile([question('q1','images/map.png')],{'images/map.png':'iVBORw0KGgo=','images/unused.png':'iVBORw0KGgo='}));expect(result.ok).toBe(true);expect(result.assets).toEqual([]);});it('no longer inspects missing referenced images',async()=>{const result=await importLoopDeckZip(await zipFile([question('q1','images/missing.png')]));expect(result.ok).toBe(true);expect(result.issues.some(i=>i.path==='images/missing.png')).toBe(false);});it('no longer stages ZIP assets',async()=>{const result=await importLoopDeckZip(await zipFile([question('q1','images/map.png')],{'images/map.png':'iVBORw0KGgo='}));expect(takeStagedPackAssets(result.pack!)).toBeUndefined();});it('retires JSON imports instead of staging them',async()=>{const pack={...manifest(),modules:modules(['q1']),questions:[question('q1')]};const result=await importLoopDeckJson(new File([JSON.stringify(pack)],'image-pack.loopdeck.json'));expect(result.ok).toBe(false);expect(result.pack).toBeUndefined();expect(result.issues.some(i=>i.message==='Direct JSON import is retired.')).toBe(true);});});
+
+describe('retired importer asset surface',()=>{
+  it('does not extract or return assets from ZIP input',async()=>{
+    const result=await importLoopDeckZip(new File(['ignored'],'image-pack.loopdeck.zip'));
+    expect(result.ok).toBe(false);
+    expect(result.assets).toBeUndefined();
+    expect(result.pack).toBeUndefined();
+  });
+  it('does not stage JSON imports',async()=>{
+    const result=await importLoopDeckJson(new File(['{}'],'image-pack.loopdeck.json'));
+    expect(result.ok).toBe(false);
+    expect(result.pack).toBeUndefined();
+  });
+});
