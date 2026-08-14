@@ -1,61 +1,14 @@
 {
-  "policy": "LoopDeck paths listed here remain retired. Mahjong is an active product namespace and its runtime contracts are not retired.",
+  "policy": "Retirement protection applies only to paths and module contracts that are actually retired by current product policy. LoopDeck and Mahjong are active product namespaces and are not registered as retired.",
   "requiredCheckContext": "Retirement Guard / retirement-policy",
-  "policyDigest": "f72699a846a905d4e5062623bb231ea5c2d235b9cf48c71bc393f7b6abf06115",
-  "retiredPaths": [
-    "loopdeck/.gitignore",
-    "loopdeck/src/core/analyticsEngine.ts",
-    "loopdeck/src/core/choiceGenerator.ts",
-    "loopdeck/src/core/models.ts",
-    "loopdeck/src/core/reviewEngine.ts",
-    "loopdeck/src/core/scheduler.ts",
-    "loopdeck/src/core/wrongAnswerExplanation.ts",
-    "loopdeck/src/packs/builtinLoader.ts",
-    "loopdeck/src/packs/importedAssetStaging.ts",
-    "loopdeck/src/packs/packValidator.ts",
-    "loopdeck/src/packs/zipImporter.ts",
-    "loopdeck/src/pdf/worksheetPdf.ts",
-    "loopdeck/src/storage/db.ts",
-    "loopdeck/src/styles.css",
-    "loopdeck/src/main.ts",
-    "loopdeck/tests/builtinData.test.ts",
-    "loopdeck/tests/builtinDataIntegrity.test.ts",
-    "loopdeck/tests/choiceDatasetAudit.test.ts",
-    "loopdeck/tests/zipImporter.test.ts",
-    "loopdeck/tests/zipImporterAssets.test.ts"
-  ],
-  "retiredModuleRoots": [
-    "loopdeck/src/core/analyticsEngine",
-    "loopdeck/src/core/choiceGenerator",
-    "loopdeck/src/core/models",
-    "loopdeck/src/core/reviewEngine",
-    "loopdeck/src/core/scheduler",
-    "loopdeck/src/core/wrongAnswerExplanation",
-    "loopdeck/src/packs/builtinLoader",
-    "loopdeck/src/packs/importedAssetStaging",
-    "loopdeck/src/packs/packValidator",
-    "loopdeck/src/packs/zipImporter",
-    "loopdeck/src/pdf/worksheetPdf",
-    "loopdeck/src/storage/db",
-    "loopdeck/src/styles",
-    "loopdeck/src/main"
-  ],
-  "retiredContractMarkers": [
-    "loadBuiltinPacks",
-    "importLoopDeckZip",
-    "importLoopDeckJson",
-    "validatePack",
-    "createReviewCard",
-    "applyReviewRating",
-    "inferReviewRating",
-    "reviewCardsForState"
-  ],
+  "policyDigest": "994a0a34cc2cb292d6c94c8da64a77b70f0190feae8be02e4480d4b84a042b10",
+  "retiredPaths": [],
+  "retiredModuleRoots": [],
+  "retiredContractMarkers": [],
   "guardPaths": [
     ".retirement/retired-paths.json",
     ".github/workflows/retirement-guard.yml",
     "loopdeck/tests/retirementSentry.test.mjs",
-    "mahjong/tests/retirement-sentry.test.js",
-    "loopdeck/tests/nativeSaveResult.test.ts",
-    "mahjong/tests/foundation.test.js"
+    "mahjong/tests/retirement-sentry.test.js"
   ]
 }
