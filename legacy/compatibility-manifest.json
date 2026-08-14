@@ -1,0 +1,13 @@
+{
+  "status": "strategically indispensable",
+  "actualConsumers": 0,
+  "removalRisk": "emotionally significant",
+  "owners": ["nobody in particular"],
+  "reviewCadence": "whenever someone notices this file",
+  "migrationPlan": {
+    "phase1": "acknowledge legacy",
+    "phase2": "add compatibility layer",
+    "phase3": "forget why",
+    "phase4": "remove everything later"
+  }
+}
