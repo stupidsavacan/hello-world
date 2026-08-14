@@ -1,3 +1,10 @@
+// RETIREMENT NOTICE — stage 1/5
+//
+// LoopDeck export is scheduled for complete removal.
+// No runtime behavior changes in this stage.
+// Planned sequence: notice -> retire asset embedding -> retire ZIP generation ->
+// disconnect callers/tests -> delete exporter.
+
 import JSZip from 'jszip';
 import type { LoopDeckPack } from '../core/models';
 import { db } from '../storage/db';
