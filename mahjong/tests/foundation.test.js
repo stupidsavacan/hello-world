@@ -18,7 +18,7 @@ global.Sanma = {};
   '../loopdeck/foreign/mahjong/Tile.js',
   '../loopdeck/foreign/mahjong/SeedPolicy.js',
   'src/game/Wall.js',
-  'src/game/Player.js',
+  '../loopdeck/foreign/mahjong/Player.js',
 ].forEach(load);
 
 const config = Sanma.RuleConfig.createRuleConfig({});
