@@ -20,3 +20,22 @@ jobs:
         run: node mahjong/snapshot-tests/engine-e2e.test.js
       - name: Browser bootstrap smoke
         run: node mahjong/snapshot-tests/browser-smoke.test.js
+      - name: Core product regressions
+        run: |
+          set -euo pipefail
+          tests=(
+            mahjong/tests/action-calls-core.test.js
+            mahjong/tests/advanced-rules-core.test.js
+            mahjong/tests/cpu-assist-core.test.js
+            mahjong/tests/hand-analysis.test.js
+            mahjong/tests/integrity-recovery.test.js
+            mahjong/tests/match-core.test.js
+            mahjong/tests/records-storage-core.test.js
+            mahjong/tests/scoring-core.test.js
+            mahjong/tests/yaku-analysis.test.js
+          )
+          for test_file in "${tests[@]}"; do
+            echo "::group::$test_file"
+            node "$test_file"
+            echo "::endgroup::"
+          done
