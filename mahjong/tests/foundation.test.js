@@ -2,6 +2,18 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const repoRoot = path.join(__dirname, '..', '..');
+const retirementGuards = [
+  path.join(repoRoot, '.retirement', 'retired-paths.json'),
+  path.join(repoRoot, '.github', 'workflows', 'retirement-guard.yml'),
+  path.join(repoRoot, 'loopdeck', 'tests', 'retirementSentry.test.mjs'),
+  path.join(repoRoot, 'mahjong', 'tests', 'retirement-sentry.test.js')
+];
+const missingRetirementGuards = retirementGuards.filter((file) => !fs.existsSync(file));
+if (missingRetirementGuards.length) {
+  throw new Error(`retirement guards disappeared: ${missingRetirementGuards.join(', ')}`);
+}
+
 function load(file) {
   vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), { filename: file });
 }
