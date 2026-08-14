@@ -1,0 +1,125 @@
+name: Retirement Guard v4 Atomic Bootstrap
+
+on:
+  workflow_run:
+    workflows: ["Retirement Guard"]
+    types: [completed]
+
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  authorize-atomic-v4-policy:
+    if: >-
+      github.event.workflow_run.event == 'pull_request_target' &&
+      github.event.workflow_run.head_branch == 'guard/retirement-policy-v4-atomic' &&
+      github.event.workflow_run.conclusion == 'failure'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Validate and authorize the one atomic v4 upgrade
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const crypto = require('crypto');
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const run = context.payload.workflow_run;
+            const allowedBranch = 'guard/retirement-policy-v4-atomic';
+            const allowedDigest = '37243f8838a016c7a53d5e4605b946f3c75b571854cbe5ce5c5b25da54baa76f';
+
+            if (run.head_branch !== allowedBranch || !run.head_sha) {
+              core.setFailed('Atomic bootstrap branch/head mismatch.');
+              return;
+            }
+
+            const prs = run.pull_requests || [];
+            if (prs.length !== 1) {
+              core.setFailed(`Expected exactly one PR for the atomic bootstrap run, found ${prs.length}.`);
+              return;
+            }
+            const prNumber = prs[0].number;
+            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
+            if (pr.state !== 'open' || pr.base.ref !== 'main' || pr.head.ref !== allowedBranch || pr.head.sha !== run.head_sha) {
+              core.setFailed('Atomic v4 PR no longer matches its workflow run.');
+              return;
+            }
+
+            const policyFiles = [
+              '.retirement/retired-paths.json',
+              '.github/workflows/retirement-guard.yml',
+              'loopdeck/tests/retirementSentry.test.mjs',
+              'mahjong/tests/retirement-sentry.test.js',
+            ];
+            const removals = [
+              'mahjong/src/game/ActionResolver.js',
+              'mahjong/src/game/AssistManager.js',
+              'mahjong/src/game/CallResolver.js',
+              'mahjong/src/game/CallWindow.js',
+              'mahjong/src/game/CpuStrategy.js',
+              'mahjong/src/game/CpuVisibleTiles.js',
+              'mahjong/src/game/DoraCalculator.js',
+              'mahjong/src/game/FuritenManager.js',
+              'mahjong/src/game/GameRecord.js',
+              'mahjong/src/game/InvariantChecker.js',
+              'mahjong/src/game/RecoveryManager.js',
+              'mahjong/src/game/RuleConfig.js',
+              'mahjong/src/game/TileLedger.js',
+            ];
+            const expected = new Set([...policyFiles, ...removals]);
+
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner,
+              repo,
+              pull_number: prNumber,
+              per_page: 100,
+            });
+            const actual = new Map(files.map((file) => [file.filename, file.status]));
+            const unexpected = [...actual.keys()].filter((path) => !expected.has(path));
+            const missing = [...expected].filter((path) => !actual.has(path));
+            const wrongRemovalStatus = removals.filter((path) => actual.get(path) !== 'removed');
+            const wrongPolicyStatus = policyFiles.filter((path) => !['modified', 'changed'].includes(actual.get(path)));
+            if (unexpected.length || missing.length || wrongRemovalStatus.length || wrongPolicyStatus.length || actual.size !== expected.size) {
+              core.setFailed(`Atomic v4 file set mismatch. unexpected=${unexpected.join(',')} missing=${missing.join(',')} wrongRemovals=${wrongRemovalStatus.join(',')} wrongPolicy=${wrongPolicyStatus.join(',')}`);
+              return;
+            }
+
+            async function getText(path) {
+              const response = await github.rest.repos.getContent({ owner, repo, path, ref: run.head_sha });
+              if (Array.isArray(response.data) || !response.data.content) throw new Error(`Missing file content for ${path}`);
+              return Buffer.from(response.data.content, 'base64').toString('utf8');
+            }
+
+            const registryText = await getText('.retirement/retired-paths.json');
+            const registry = JSON.parse(registryText);
+            const critical = {
+              guardPaths: [...(registry.guardPaths || [])].sort(),
+              requiredCheckContext: registry.requiredCheckContext || '',
+              retiredContractMarkers: [...(registry.retiredContractMarkers || [])].sort(),
+              retiredModuleRoots: [...(registry.retiredModuleRoots || [])].sort(),
+              retiredPaths: [...(registry.retiredPaths || [])].sort(),
+            };
+            const actualDigest = crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');
+            if (registry.policyDigest !== allowedDigest || actualDigest !== allowedDigest) {
+              core.setFailed(`Atomic policy digest mismatch. declared=${registry.policyDigest || 'missing'} actual=${actualDigest}`);
+              return;
+            }
+
+            for (const path of policyFiles.slice(1)) {
+              const text = await getText(path);
+              if (!text.includes(allowedDigest)) {
+                core.setFailed(`${path} does not pin the approved v4 digest.`);
+                return;
+              }
+            }
+
+            await github.rest.repos.createCommitStatus({
+              owner,
+              repo,
+              sha: run.head_sha,
+              state: 'success',
+              context: 'Retirement Guard / retirement-policy',
+              description: 'One-time atomic Guard v4 upgrade authorized'
+            });
+            core.notice(`Authorized atomic Guard v4 PR #${prNumber} at ${run.head_sha}.`);
