@@ -22,6 +22,21 @@ jobs:
         run: node mahjong/snapshot-tests/replay-hardening.test.js
       - name: Browser bootstrap smoke
         run: node mahjong/snapshot-tests/browser-smoke.test.js
+      - name: Deep flow regressions
+        run: |
+          set -euo pipefail
+          tests=(
+            mahjong/tests/game-engine-public-api.test.js
+            mahjong/tests/flow-module-boundaries.test.js
+            mahjong/tests/cpu-kan-rinshan-win.test.js
+            mahjong/tests/no-minkan-rinshan-on-empty-wall.test.js
+            mahjong/tests/recovery-pending-cpu-ron.test.js
+          )
+          for test_file in "${tests[@]}"; do
+            echo "::group::$test_file"
+            node "$test_file"
+            echo "::endgroup::"
+          done
       - name: Product regressions
         run: |
           set -euo pipefail
