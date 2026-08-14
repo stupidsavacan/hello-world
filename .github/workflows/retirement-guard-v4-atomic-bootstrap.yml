@@ -1,9 +1,8 @@
 name: Retirement Guard v4 Atomic Bootstrap
 
 on:
-  workflow_run:
-    workflows: ["Retirement Guard"]
-    types: [completed]
+  pull_request_target:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -13,36 +12,47 @@ permissions:
 jobs:
   authorize-atomic-v4-policy:
     if: >-
-      github.event.workflow_run.event == 'pull_request_target' &&
-      github.event.workflow_run.head_branch == 'guard/retirement-policy-v4-atomic' &&
-      github.event.workflow_run.conclusion == 'failure'
+      github.event.pull_request.base.ref == 'main' &&
+      github.event.pull_request.head.ref == 'guard/retirement-policy-v4-atomic'
     runs-on: ubuntu-latest
     steps:
-      - name: Validate and authorize the one atomic v4 upgrade
+      - name: Wait for the ordinary guard, then validate the one atomic v4 upgrade
         uses: actions/github-script@v7
         with:
           script: |
             const crypto = require('crypto');
             const owner = context.repo.owner;
             const repo = context.repo.repo;
-            const run = context.payload.workflow_run;
+            const pr = context.payload.pull_request;
             const allowedBranch = 'guard/retirement-policy-v4-atomic';
             const allowedDigest = '37243f8838a016c7a53d5e4605b946f3c75b571854cbe5ce5c5b25da54baa76f';
+            const requiredContext = 'Retirement Guard / retirement-policy';
 
-            if (run.head_branch !== allowedBranch || !run.head_sha) {
-              core.setFailed('Atomic bootstrap branch/head mismatch.');
+            if (pr.state !== 'open' || pr.base.ref !== 'main' || pr.head.ref !== allowedBranch || !pr.head.sha) {
+              core.setFailed('Atomic bootstrap PR identity mismatch.');
               return;
             }
 
-            const prs = run.pull_requests || [];
-            if (prs.length !== 1) {
-              core.setFailed(`Expected exactly one PR for the atomic bootstrap run, found ${prs.length}.`);
-              return;
+            // The ordinary base-owned Retirement Guard writes this context pending -> failure.
+            // Wait until that failure is observable before doing anything, so our one-time
+            // success cannot race and then be overwritten by the ordinary guard afterward.
+            let sawOrdinaryFailure = false;
+            for (let attempt = 0; attempt < 24; attempt += 1) {
+              const response = await github.rest.repos.listCommitStatusesForRef({
+                owner,
+                repo,
+                ref: pr.head.sha,
+                per_page: 100,
+              });
+              const status = response.data.find((item) => item.context === requiredContext);
+              if (status?.state === 'failure') {
+                sawOrdinaryFailure = true;
+                break;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 3000));
             }
-            const prNumber = prs[0].number;
-            const { data: pr } = await github.rest.pulls.get({ owner, repo, pull_number: prNumber });
-            if (pr.state !== 'open' || pr.base.ref !== 'main' || pr.head.ref !== allowedBranch || pr.head.sha !== run.head_sha) {
-              core.setFailed('Atomic v4 PR no longer matches its workflow run.');
+            if (!sawOrdinaryFailure) {
+              core.setFailed('Ordinary Retirement Guard failure was not observed; refusing bootstrap authorization.');
               return;
             }
 
@@ -59,7 +69,7 @@ jobs:
               return Buffer.from(response.data.content, 'base64').toString('utf8');
             }
 
-            const registryText = await getText('.retirement/retired-paths.json', run.head_sha);
+            const registryText = await getText('.retirement/retired-paths.json', pr.head.sha);
             const registry = JSON.parse(registryText);
             const critical = {
               guardPaths: [...(registry.guardPaths || [])].sort(),
@@ -75,13 +85,16 @@ jobs:
             }
 
             for (const path of policyFiles.slice(1)) {
-              const text = await getText(path, run.head_sha);
+              const text = await getText(path, pr.head.sha);
               if (!text.includes(allowedDigest)) {
                 core.setFailed(`${path} does not pin the approved v4 digest.`);
                 return;
               }
             }
 
+            // Derive the permitted deletion set from THIS PR's base. Any retired exact path
+            // that exists on base must be removed in the atomic PR; already-absent paths need
+            // no fake diff. Nothing outside those removals + four policy files may change.
             const baseRetiredFiles = [];
             for (const path of registry.retiredPaths || []) {
               try {
@@ -96,7 +109,7 @@ jobs:
             const files = await github.paginate(github.rest.pulls.listFiles, {
               owner,
               repo,
-              pull_number: prNumber,
+              pull_number: pr.number,
               per_page: 100,
             });
             const actual = new Map(files.map((file) => [file.filename, file.status]));
@@ -117,9 +130,9 @@ jobs:
             await github.rest.repos.createCommitStatus({
               owner,
               repo,
-              sha: run.head_sha,
+              sha: pr.head.sha,
               state: 'success',
-              context: 'Retirement Guard / retirement-policy',
+              context: requiredContext,
               description: `Atomic Guard v4 authorized (${baseRetiredFiles.length} retired paths removed)`
             });
-            core.notice(`Authorized atomic Guard v4 PR #${prNumber}; removed every retired path present on base ${pr.base.sha}.`);
+            core.notice(`Authorized atomic Guard v4 PR #${pr.number}; all base-present retired paths are removed and the approved digest is pinned.`);
