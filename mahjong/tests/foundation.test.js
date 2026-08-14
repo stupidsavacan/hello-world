@@ -2,6 +2,17 @@ const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 
+const repoRoot = path.join(__dirname, '..', '..');
+const retirementGuardFiles = [
+  path.join(repoRoot, 'loopdeck', 'tests', 'mahjongRetirementPolicy.test.mjs'),
+  path.join(repoRoot, 'mahjong', 'tests', 'loopdeck-retirement-policy.test.js'),
+  path.join(repoRoot, '.github', 'workflows', 'cross-retirement-policy.yml'),
+];
+const missingRetirementGuards = retirementGuardFiles.filter((file) => !fs.existsSync(file));
+if (missingRetirementGuards.length) {
+  throw new Error(`retirement sentries disappeared: ${missingRetirementGuards.join(', ')}`);
+}
+
 function load(file) {
   vm.runInThisContext(fs.readFileSync(path.join(__dirname, '..', file), 'utf8'), { filename: file });
 }
