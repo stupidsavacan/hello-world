@@ -32,10 +32,7 @@
     "mahjong/src/game/InvariantChecker.js",
     "mahjong/src/game/RecoveryManager.js",
     "mahjong/src/game/RuleConfig.js",
-    "mahjong/src/game/TileLedger.js",
-    "mahjong/tests/cpu-assist-core.test.js",
-    "mahjong/tests/integrity-recovery.test.js",
-    "mahjong/tests/records-storage-core.test.js"
+    "mahjong/src/game/TileLedger.js"
   ],
   "guardPaths": [
     ".retirement/retired-paths.json",
