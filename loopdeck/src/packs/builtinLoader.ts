@@ -1,3 +1,9 @@
+// RETIREMENT NOTICE — stage 1/4
+//
+// The canonical built-in dataset loader is scheduled for complete removal.
+// No runtime behavior changes in this stage.
+// Planned sequence: notice -> stop integrity/normalization work -> empty compatibility shelf -> delete.
+
 import builtinMeta from '../../data/builtin/meta.json';
 import type { LoopDeckPack, Question } from '../core/models';
 import { validatePack } from './packValidator';
