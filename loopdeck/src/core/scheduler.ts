@@ -1,8 +1,8 @@
-// RETIREMENT NOTICE — stage 6/12
+// RETIREMENT NOTICE — stage 7/12
 //
-// Automatic promotion into `leech` is retired in this stage.
-// Existing leech cards remain readable, bucketable, and countable for compatibility,
-// but new reviews no longer promote cards into that state.
+// Automatic promotion into `mastered` is retired in this stage.
+// Existing mastered cards remain readable, bucketable, and countable for compatibility,
+// but successful reviews no longer move cards into that state.
 
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
@@ -81,7 +81,6 @@ function nextIntervalDays(previousIntervalDays: number, _ease: number, rating: R
   if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * 3.25));
   return 0;
 }
-function isMastered(card: ReviewCard): boolean { return card.correctStreak >= 5 && card.intervalDays >= 30 && card.lapseCount === 0; }
 function reviewLogId(questionId: string, reviewedAt: string): string { return `${reviewedAt}-${questionId}-${Math.random().toString(36).slice(2, 10)}`; }
 
 export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating, result: AnswerResult, elapsedMs: number, options: ApplyReviewOptions = {}): ReviewScheduleResult {
@@ -113,7 +112,6 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
     next.state = 'review';
   }
 
-  if (isMastered(next)) next.state = 'mastered';
   if (next.suspended) next.state = 'suspended';
 
   const log: ReviewLog = {
