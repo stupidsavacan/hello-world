@@ -28,6 +28,8 @@ jobs:
           tests=(
             mahjong/tests/native-foundation.test.js
             mahjong/tests/browser-bootstrap.test.js
+            mahjong/tests/replay-viewer-core.test.js
+            mahjong/tests/replay-panel-bootstrap.test.js
             mahjong/tests/engine-e2e.test.js
             mahjong/tests/action-calls-core.test.js
             mahjong/tests/advanced-rules-core.test.js
