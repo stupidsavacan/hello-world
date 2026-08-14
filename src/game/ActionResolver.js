@@ -1,7 +1,7 @@
-// RETIREMENT 2/10 — CALL SELECTION RETIRED
+// RETIREMENT 3/10 — LIVE-TILE VALUATION RETIRED
 //
-// The resurrected CpuStrategy body no longer evaluates pon/chi/kan calls here.
-// `chooseCall` remains only as a compatibility stub returning null.
+// Visible-tile counts, remaining-tile estimates, and live-shape bonuses are gone.
+// Risk and hand-value heuristics remain for later stages.
 
 (function attachCpuStrategy(global){
   const Sanma=global.Sanma=global.Sanma||{};
@@ -11,9 +11,36 @@
   const counts=(tiles,rule)=>Sanma.HandAnalysis.toCountArray(tiles,rule||{}).counts;
   function sequenceShape(tile,c){if(!tile||!['p','s'].includes(tile.suit))return false;const i=Sanma.HandAnalysis.getTypeIndex(tile);return[-2,-1,1,2].some(o=>{const n=i+o;return n>=0&&n<c.length&&Math.floor(n/9)===Math.floor(i/9)&&c[n]>0;});}
   function value(player,tiles,state,rule){const c=counts(tiles,rule),d=new Set(((state&&state.wall&&state.wall.doraIndicators)||(state&&state.doraIndicators)||[]).filter(Boolean).map(t=>t.baseId));let v=0;c.forEach((n,i)=>{if(n>=3)v+=24;else if(n>=2)v+=8;if(i>=27&&n>=2)v+=6;});tiles.forEach(t=>{if(!t)return;if(t.isRed)v+=8;if(d.has(t.baseId))v+=6;if(t.suit==='z'&&t.rank>=5)v+=4;});(player&&player.melds||[]).forEach(m=>{v+=m&&m.type==='kan'?24:14;});v+=(player&&player.kitaTiles||[]).length*8;return v;}
-  function liveValue(tiles,rule,remaining){const c=counts(tiles,rule);let v=0;tiles.forEach(t=>{if(!t)return;const rem=Number.isInteger(remaining[t.baseId])?remaining[t.baseId]:2,i=Sanma.HandAnalysis.getTypeIndex(t);if((c[i]||0)>=2)v+=rem*3;if(['p','s'].includes(t.suit))[-2,-1,1,2].forEach(o=>{const r=t.rank+o;if(r<1||r>9)return;const id=Sanma.TileUtil.baseId(t.suit,r),n=Number.isInteger(remaining[id])?remaining[id]:2;v+=Math.abs(o)===1?n*2:n;});});return v;}
   const penalty=(mode,d)=>mode==='fold'?d*2.1:mode==='balanced'?d*.85:d*.3;
-  function chooseDiscard(input){const o=input||{},p=o.player||{},hand=Array.isArray(p.hand)?p.hand:[],rule=o.ruleConfig||{},rand=typeof o.random==='function'?o.random:Math.random;if(!hand.length)return{tileInstanceId:null,reason:'手牌がありません。',candidates:[],score:0};const c=counts(hand,rule),open=(p.melds||[]).length,current=estimateShanten({tiles:hand,ruleConfig:rule,openMeldCount:open}),hv=value(p,hand,o.state,rule),mode=Sanma.CpuRiskAnalysis&&o.state?Sanma.CpuRiskAnalysis.choosePushFoldMode(o.state,p.id,hv,current):'balanced',seen=Sanma.CpuVisibleTiles&&o.state?Sanma.CpuVisibleTiles.getVisibleCountsForPlayer(o.state,p.id):Object.create(null),remaining=Sanma.CpuVisibleTiles&&o.state?Sanma.CpuVisibleTiles.getRemainingByBaseId(o.state,p.id):Object.create(null),win=Boolean(o.analysis&&o.analysis.scoreResult&&o.analysis.scoreResult.isValidWin);const cand=hand.map((t,i)=>{const left=hand.slice();left.splice(i,1);const sh=estimateShanten({tiles:left,ruleConfig:rule,openMeldCount:open}),tenpai=sh<=0,type=Sanma.HandAnalysis.getTypeIndex(t),n=c[type]||0,reasons=[];let score=-sh*35;if(t.suit==='z'&&n===1){score+=30;reasons.push('孤立字牌');}if((t.suit==='m'||t.rank===1||t.rank===9)&&n===1){score+=16;reasons.push('孤立端牌');}if(n>=2){score-=15;reasons.push('対子を崩す');}if(sequenceShape(t,c)){score-=20;reasons.push('筋牌形を崩す');}if(tenpai){score+=60;reasons.push('聴牌維持');}if(win){score+=1000;reasons.push('和了可能');}if(t.isRed&&n>=2){score-=8;reasons.push('赤牌を温存');}if(!reasons.length)reasons.push('シャンテン優先');const handValue=value(p,left,o.state,rule),lv=liveValue(left,rule,remaining),risk=Sanma.CpuRiskAnalysis&&o.state?Sanma.CpuRiskAnalysis.explainTileDanger(o.state,p.id,t):{danger:0,reasons:[]};score+=handValue*.12+lv*.25-penalty(mode,risk.danger);const rem=Number.isInteger(remaining[t.baseId])?remaining[t.baseId]:null;if(rem===0){score+=mode==='fold'?26:14;reasons.push('可視残り0枚');}else if(rem!==null)reasons.push(`可視残り${rem}枚`);if(mode==='fold'&&risk.danger<=12){score+=18;reasons.push('安全寄せ');}if(risk.danger>=70)reasons.push('危険度高');const tie=rand();return{tileInstanceId:t.instanceId,tileLabel:Sanma.TileUtil.getTileAriaLabel(t),tileType:t.baseId,visibleCount:seen[t.baseId]||0,remainingVisibleEstimate:rem,danger:risk.danger,dangerReasons:risk.reasons,pushFoldMode:mode,handValue,liveShapeValue:lv,safetyReason:risk.danger<=12?(risk.reasons[0]||'低危険度'):null,score:score+tie/1000,baseScore:score,shanten:sh,tenpai,reasons,tieBreaker:tie};}).sort((a,b)=>b.score-a.score||String(a.tileInstanceId).localeCompare(String(b.tileInstanceId)));const s=cand[0];return{tileInstanceId:s.tileInstanceId,reason:`${s.reasons.join('、')}。シャンテン推定 ${s.shanten}。`,candidates:cand,score:s.baseScore,pushFoldMode:s.pushFoldMode,danger:s.danger,handValue:s.handValue};}
+  function chooseDiscard(input){
+    const o=input||{},p=o.player||{},hand=Array.isArray(p.hand)?p.hand:[],rule=o.ruleConfig||{},rand=typeof o.random==='function'?o.random:Math.random;
+    if(!hand.length)return{tileInstanceId:null,reason:'手牌がありません。',candidates:[],score:0};
+    const c=counts(hand,rule),open=(p.melds||[]).length,current=estimateShanten({tiles:hand,ruleConfig:rule,openMeldCount:open}),hv=value(p,hand,o.state,rule);
+    const mode=Sanma.CpuRiskAnalysis&&o.state?Sanma.CpuRiskAnalysis.choosePushFoldMode(o.state,p.id,hv,current):'balanced';
+    const win=Boolean(o.analysis&&o.analysis.scoreResult&&o.analysis.scoreResult.isValidWin);
+    const cand=hand.map((t,i)=>{
+      const left=hand.slice();left.splice(i,1);
+      const sh=estimateShanten({tiles:left,ruleConfig:rule,openMeldCount:open}),tenpai=sh<=0,type=Sanma.HandAnalysis.getTypeIndex(t),n=c[type]||0,reasons=[];
+      let score=-sh*35;
+      if(t.suit==='z'&&n===1){score+=30;reasons.push('孤立字牌');}
+      if((t.suit==='m'||t.rank===1||t.rank===9)&&n===1){score+=16;reasons.push('孤立端牌');}
+      if(n>=2){score-=15;reasons.push('対子を崩す');}
+      if(sequenceShape(t,c)){score-=20;reasons.push('筋牌形を崩す');}
+      if(tenpai){score+=60;reasons.push('聴牌維持');}
+      if(win){score+=1000;reasons.push('和了可能');}
+      if(t.isRed&&n>=2){score-=8;reasons.push('赤牌を温存');}
+      if(!reasons.length)reasons.push('シャンテン優先');
+      const handValue=value(p,left,o.state,rule);
+      const risk=Sanma.CpuRiskAnalysis&&o.state?Sanma.CpuRiskAnalysis.explainTileDanger(o.state,p.id,t):{danger:0,reasons:[]};
+      score+=handValue*.12-penalty(mode,risk.danger);
+      if(mode==='fold'&&risk.danger<=12){score+=18;reasons.push('安全寄せ');}
+      if(risk.danger>=70)reasons.push('危険度高');
+      const tie=rand();
+      return{tileInstanceId:t.instanceId,tileLabel:Sanma.TileUtil.getTileAriaLabel(t),tileType:t.baseId,danger:risk.danger,dangerReasons:risk.reasons,pushFoldMode:mode,handValue,score:score+tie/1000,baseScore:score,shanten:sh,tenpai,reasons,tieBreaker:tie};
+    }).sort((a,b)=>b.score-a.score||String(a.tileInstanceId).localeCompare(String(b.tileInstanceId)));
+    const s=cand[0];
+    return{tileInstanceId:s.tileInstanceId,reason:`${s.reasons.join('、')}。シャンテン推定 ${s.shanten}。`,candidates:cand,score:s.baseScore,pushFoldMode:s.pushFoldMode,danger:s.danger,handValue:s.handValue};
+  }
   function chooseCall(){return null;}
   Sanma.CpuStrategy={chooseDiscard,estimateShanten,chooseCall};
 })(window);
