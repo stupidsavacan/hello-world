@@ -1,0 +1,7 @@
+<!doctype html>
+<html lang="ja">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Offline 3P Tiles</title></head>
+<body><main id="boot">起動中…</main>
+<script src="product/c01.js"></script><script src="product/c02.js"></script><script src="product/c03.js"></script><script src="product/c04.js"></script><script src="product/c05.js"></script><script src="product/c06a.js"></script><script src="product/c06b.js"></script><script src="product/c07.js"></script><script src="product/c08.js"></script>
+<script>(async()=>{try{if(typeof DecompressionStream!=="function")throw new Error("このブラウザはオフライン展開APIに対応していません");const b=Uint8Array.from(atob(globalThis.P||""),c=>c.charCodeAt(0));const s=new Blob([b]).stream().pipeThrough(new DecompressionStream("gzip"));const h=await new Response(s).text();document.open();document.write(h);document.close()}catch(e){document.getElementById("boot").textContent="起動失敗: "+e.message;console.error(e)}})();</script>
+</body></html>
