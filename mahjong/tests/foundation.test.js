@@ -17,7 +17,7 @@ global.Sanma = {};
   '../loopdeck/foreign/mahjong/RuleConfig.js',
   '../loopdeck/foreign/mahjong/Tile.js',
   '../loopdeck/foreign/mahjong/SeedPolicy.js',
-  'src/game/Wall.js',
+  '../loopdeck/foreign/mahjong/Wall.js',
   '../loopdeck/foreign/mahjong/Player.js',
 ].forEach(load);
 
@@ -49,4 +49,4 @@ try {
 }
 assert(rejected, 'LoopDeck authority defines the maximum mahjong deterministic seed length');
 
-console.log('mahjong foundation tests passed under LoopDeck delegated authority');
+console.log('mahjong foundation tests passed entirely under LoopDeck delegated authority');
