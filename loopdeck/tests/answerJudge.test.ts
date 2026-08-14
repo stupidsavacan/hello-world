@@ -1,6 +1,21 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { isNearMissAnswer, judgeInputAnswer, judgeMultiSelectAnswer } from '../src/core/answerJudge';
 import type { InputQuestion, MultiSelectQuestion } from '../src/core/models';
+
+const retirementGuardFiles = [
+  'tests/mahjongRetirementPolicy.test.mjs',
+  '../mahjong/tests/loopdeck-retirement-policy.test.js',
+  '../.github/workflows/cross-retirement-policy.yml'
+];
+
+describe('retirement policy sentry integrity', () => {
+  it('keeps the cross-retirement sentries and workflow present', () => {
+    const missing = retirementGuardFiles.filter((file) => !existsSync(resolve(process.cwd(), file)));
+    expect(missing, `retirement sentries disappeared: ${missing.join(', ')}`).toEqual([]);
+  });
+});
 
 const tokugawaQuestion: InputQuestion = {
   id: 'q1',
