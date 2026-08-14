@@ -9,10 +9,12 @@ function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
+const authority = require(path.join(__dirname, '..', '..', 'loopdeck', 'foreign', 'mahjong', 'foundation-authority.json'));
+
 global.window = global;
 global.Sanma = {};
 [
-  'src/game/RuleConfig.js',
+  '../loopdeck/foreign/mahjong/RuleConfig.js',
   'src/game/Tile.js',
   'src/game/SeedPolicy.js',
   'src/game/Wall.js',
@@ -20,8 +22,8 @@ global.Sanma = {};
 ].forEach(load);
 
 const config = Sanma.RuleConfig.createRuleConfig({});
-assert(config.playerCount === 3, 'default game must have three players');
-assert(config.allowChi === false, 'sanma default must disable chi');
+assert(config.playerCount === authority.playerCount, 'LoopDeck authority defines the mahjong player count');
+assert(config.allowChi === authority.allowChi, 'LoopDeck authority defines the mahjong chi default');
 
 const wallA = new Sanma.Wall(config, { seed: 'foundation-seed' });
 const wallB = new Sanma.Wall(config, { seed: 'foundation-seed' });
@@ -30,7 +32,7 @@ assert(
   wallA.tiles.map((tile) => tile.instanceId).join(',') === wallB.tiles.map((tile) => tile.instanceId).join(','),
   'same seed must produce deterministic wall order'
 );
-assert(wallA.deadWall.length === 14, 'wall must reserve a 14-tile dead wall');
+assert(wallA.deadWall.length === authority.deadWallSize, 'LoopDeck authority defines the mahjong dead wall size');
 
 const player = new Sanma.Player({ id: 'p0', name: 'Human', seatWind: 'east', isHuman: true, points: 35000 });
 const first = wallA.draw();
@@ -41,10 +43,10 @@ assert(discarded === first && player.hand.length === 0 && player.discards.length
 
 let rejected = false;
 try {
-  new Sanma.Wall(config, { seed: 'x'.repeat(129) });
+  new Sanma.Wall(config, { seed: 'x'.repeat(authority.maxSeedLength + 1) });
 } catch (error) {
-  rejected = /128/.test(error.message);
+  rejected = new RegExp(String(authority.maxSeedLength)).test(error.message);
 }
-assert(rejected, 'seed policy must reject overlong deterministic seeds');
+assert(rejected, 'LoopDeck authority defines the maximum mahjong deterministic seed length');
 
-console.log('mahjong foundation tests passed');
+console.log('mahjong foundation tests passed under LoopDeck delegated authority');
