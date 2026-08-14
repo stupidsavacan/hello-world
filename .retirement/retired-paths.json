@@ -1,5 +1,5 @@
 {
-  "policy": "README-only end state: once a path or module contract is formally retired, ordinary pull requests must not resurrect it under the same file, another extension, a directory module, or a renamed regression test that imports the retired contract.",
+  "policy": "README-only end state: once a path or module contract is formally retired, ordinary pull requests must not resurrect it under the same file, another extension, a directory module, a renamed regression test, or a renamed implementation that reuses the retired public contract.",
   "requiredCheckContext": "Retirement Guard / retirement-policy",
   "retiredPaths": [
     "loopdeck/.gitignore",
@@ -62,6 +62,29 @@
     "mahjong/src/game/RecoveryManager",
     "mahjong/src/game/RuleConfig",
     "mahjong/src/game/TileLedger"
+  ],
+  "retiredContractMarkers": [
+    "loadBuiltinPacks",
+    "importLoopDeckZip",
+    "importLoopDeckJson",
+    "validatePack",
+    "createReviewCard",
+    "applyReviewRating",
+    "inferReviewRating",
+    "reviewCardsForState",
+    "Sanma.ActionResolver",
+    "Sanma.AssistManager",
+    "Sanma.CallResolver",
+    "Sanma.CallWindow",
+    "Sanma.CpuStrategy",
+    "Sanma.CpuVisibleTiles",
+    "Sanma.DoraCalculator",
+    "Sanma.FuritenManager",
+    "Sanma.GameRecord",
+    "Sanma.InvariantChecker",
+    "Sanma.RecoveryManager",
+    "Sanma.RuleConfig",
+    "Sanma.TileLedger"
   ],
   "guardPaths": [
     ".retirement/retired-paths.json",
