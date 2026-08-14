@@ -25,7 +25,7 @@ jobs:
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const baseSha = pr.base.sha;
-            const EXPECTED_POLICY_DIGEST = 'f72cd3c9d169805fe68322c723356b22d1c159094356ef776321e92866f21518';
+            const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
 
             const registryResponse = await github.rest.repos.getContent({ owner, repo, path: '.retirement/retired-paths.json', ref: baseSha });
             if (Array.isArray(registryResponse.data) || !registryResponse.data.content) {
@@ -142,7 +142,7 @@ jobs:
           const fs = require('fs');
           const cp = require('child_process');
           const posix = require('path').posix;
-          const EXPECTED_POLICY_DIGEST = 'f72cd3c9d169805fe68322c723356b22d1c159094356ef776321e92866f21518';
+          const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
           const registry = JSON.parse(fs.readFileSync('.retirement/retired-paths.json', 'utf8'));
           const critical = {
             guardPaths: [...(registry.guardPaths || [])].sort(),
