@@ -1,6 +1,7 @@
 {
-  "policy": "Retirement protection applies only to paths and module contracts that are actually retired by the current product policy. LoopDeck and Mahjong are active product namespaces and are therefore not registered as retired.",
+  "policy": "Retirement protection applies only to paths and module contracts that are actually retired by the current product policy. LoopDeck and Mahjong are active product namespaces; no product contracts are currently registered as retired.",
   "requiredCheckContext": "Retirement Guard / retirement-policy",
+  "policyDigest": "d123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb",
   "retiredPaths": [],
   "retiredModuleRoots": [],
   "retiredContractMarkers": [],

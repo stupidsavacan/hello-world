@@ -20,25 +20,37 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
+            const crypto = require('crypto');
             const posix = require('path').posix;
             const { owner, repo } = context.repo;
             const pr = context.payload.pull_request;
             const baseSha = pr.base.sha;
+            const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
 
-            const registryResponse = await github.rest.repos.getContent({
-              owner,
-              repo,
-              path: '.retirement/retired-paths.json',
-              ref: baseSha,
-            });
+            const registryResponse = await github.rest.repos.getContent({ owner, repo, path: '.retirement/retired-paths.json', ref: baseSha });
             if (Array.isArray(registryResponse.data) || !registryResponse.data.content) {
               core.setFailed('Retirement registry is unavailable on the base branch.');
               return;
             }
+            const registry = JSON.parse(Buffer.from(registryResponse.data.content, 'base64').toString('utf8'));
 
-            const registry = JSON.parse(
-              Buffer.from(registryResponse.data.content, 'base64').toString('utf8')
-            );
+            function digestPolicy(value) {
+              const critical = {
+                guardPaths: [...(value.guardPaths || [])].sort(),
+                requiredCheckContext: value.requiredCheckContext || '',
+                retiredContractMarkers: [...(value.retiredContractMarkers || [])].sort(),
+                retiredModuleRoots: [...(value.retiredModuleRoots || [])].sort(),
+                retiredPaths: [...(value.retiredPaths || [])].sort(),
+              };
+              return crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');
+            }
+
+            const basePolicyDigest = digestPolicy(registry);
+            if (registry.policyDigest !== EXPECTED_POLICY_DIGEST || basePolicyDigest !== EXPECTED_POLICY_DIGEST) {
+              core.setFailed(`Base retirement policy drifted. expected=${EXPECTED_POLICY_DIGEST} declared=${registry.policyDigest || 'missing'} actual=${basePolicyDigest}`);
+              return;
+            }
+
             const retiredPaths = new Set(registry.retiredPaths || []);
             const guardPaths = new Set(registry.guardPaths || []);
             const retiredRoots = (registry.retiredModuleRoots || []).map(canonicalModulePath);
@@ -50,26 +62,17 @@ jobs:
               value = value.replace(/\/index$/i, '');
               return value;
             }
-
             function matchesRetiredModule(input) {
               const candidate = canonicalModulePath(input);
               return retiredRoots.some((root) => candidate === root || candidate.startsWith(`${root}/`));
             }
-
             function resolveSpecifier(filename, specifier) {
               if (!specifier) return null;
-              if (specifier.startsWith('.')) {
-                return canonicalModulePath(posix.join(posix.dirname(filename), specifier));
-              }
-              if (specifier.startsWith('/')) {
-                return canonicalModulePath(specifier.slice(1));
-              }
-              if (specifier.startsWith('loopdeck/') || specifier.startsWith('mahjong/')) {
-                return canonicalModulePath(specifier);
-              }
+              if (specifier.startsWith('.')) return canonicalModulePath(posix.join(posix.dirname(filename), specifier));
+              if (specifier.startsWith('/')) return canonicalModulePath(specifier.slice(1));
+              if (specifier.startsWith('loopdeck/') || specifier.startsWith('mahjong/')) return canonicalModulePath(specifier);
               return null;
             }
-
             function collectModuleSpecifiers(source) {
               const found = new Set();
               const patterns = [
@@ -78,78 +81,50 @@ jobs:
                 /\brequire\.resolve\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/g,
                 /\bimport\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/g,
               ];
-              for (const pattern of patterns) {
-                for (const match of source.matchAll(pattern)) found.add(match[1]);
-              }
+              for (const pattern of patterns) for (const match of source.matchAll(pattern)) found.add(match[1]);
               return [...found];
             }
 
-            const files = await github.paginate(github.rest.pulls.listFiles, {
-              owner,
-              repo,
-              pull_number: pr.number,
-              per_page: 100,
-            });
-
+            const files = await github.paginate(github.rest.pulls.listFiles, { owner, repo, pull_number: pr.number, per_page: 100 });
             const liveFiles = files.filter((file) => file.status !== 'removed');
             const exactResurrections = liveFiles.filter((file) => retiredPaths.has(file.filename));
             const moduleAliasResurrections = liveFiles.filter((file) => matchesRetiredModule(file.filename));
             const guardChanges = files.filter((file) => guardPaths.has(file.filename));
-
             const importViolations = [];
             const markerViolations = [];
             const scanExtensions = /\.(?:[cm]?[jt]sx?)$/i;
+
             for (const file of liveFiles) {
               if (!scanExtensions.test(file.filename) || !file.sha) continue;
               let source;
               try {
                 const blob = await github.rest.git.getBlob({ owner, repo, file_sha: file.sha });
-                source = blob.data.encoding === 'base64'
-                  ? Buffer.from(blob.data.content, 'base64').toString('utf8')
-                  : String(blob.data.content || '');
+                source = blob.data.encoding === 'base64' ? Buffer.from(blob.data.content, 'base64').toString('utf8') : String(blob.data.content || '');
               } catch (error) {
                 core.warning(`Could not inspect ${file.filename}: ${error.message}`);
                 continue;
               }
-
               for (const specifier of collectModuleSpecifiers(source)) {
                 const resolved = resolveSpecifier(file.filename, specifier);
-                if (resolved && matchesRetiredModule(resolved)) {
-                  importViolations.push(`${file.filename} -> ${specifier} (${resolved})`);
-                }
+                if (resolved && matchesRetiredModule(resolved)) importViolations.push(`${file.filename} -> ${specifier} (${resolved})`);
               }
-
-              for (const marker of retiredMarkers) {
-                if (source.includes(marker)) markerViolations.push(`${file.filename} -> ${marker}`);
-              }
+              for (const marker of retiredMarkers) if (source.includes(marker)) markerViolations.push(`${file.filename} -> ${marker}`);
             }
 
             const uniqueAliases = [...new Set(moduleAliasResurrections.map((file) => file.filename))];
             const uniqueImports = [...new Set(importViolations)];
             const uniqueMarkers = [...new Set(markerViolations)];
-
-            if (exactResurrections.length) {
-              core.error(`Retired exact paths were reintroduced: ${exactResurrections.map((file) => file.filename).join(', ')}`);
-            }
-            if (uniqueAliases.length) {
-              core.error(`Retired module contracts were rebuilt through an extension/directory alias: ${uniqueAliases.join(', ')}`);
-            }
-            if (uniqueImports.length) {
-              core.error(`Changed source/tests import retired module contracts: ${uniqueImports.join(' | ')}`);
-            }
-            if (uniqueMarkers.length) {
-              core.error(`Changed source/tests restore retired public contract markers: ${uniqueMarkers.join(' | ')}`);
-            }
-            if (guardChanges.length) {
-              core.error(`Retirement sentries were changed by the PR: ${guardChanges.map((file) => file.filename).join(', ')}`);
-            }
+            if (exactResurrections.length) core.error(`Retired exact paths were reintroduced: ${exactResurrections.map((file) => file.filename).join(', ')}`);
+            if (uniqueAliases.length) core.error(`Retired module contracts were rebuilt through an extension/directory alias: ${uniqueAliases.join(', ')}`);
+            if (uniqueImports.length) core.error(`Changed source/tests import retired module contracts: ${uniqueImports.join(' | ')}`);
+            if (uniqueMarkers.length) core.error(`Changed source/tests restore retired public contract markers: ${uniqueMarkers.join(' | ')}`);
+            if (guardChanges.length) core.error(`Retirement sentries were changed by the PR: ${guardChanges.map((file) => file.filename).join(', ')}`);
 
             if (exactResurrections.length || uniqueAliases.length || uniqueImports.length || uniqueMarkers.length || guardChanges.length) {
-              core.setFailed('README-only retirement contract violated. Exact-path, directory-module, renamed-test, renamed-contract, and sentry-tampering bypasses are blocked by the base-branch policy.');
+              core.setFailed('README-only retirement contract violated.');
               return;
             }
-
-            core.info('Retirement contract clean: no retired path, module alias, retired import/API marker, or sentry tampering found.');
+            core.info('Retirement contract clean and policy digest intact.');
 
   current-tree:
     if: github.event_name == 'push'
@@ -160,18 +135,32 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Verify the main tree contains no retired aliases
+      - name: Verify policy digest, retired aliases, and sentries
         run: |
           node <<'NODE'
+          const crypto = require('crypto');
           const fs = require('fs');
           const cp = require('child_process');
           const posix = require('path').posix;
+          const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
           const registry = JSON.parse(fs.readFileSync('.retirement/retired-paths.json', 'utf8'));
+          const critical = {
+            guardPaths: [...(registry.guardPaths || [])].sort(),
+            requiredCheckContext: registry.requiredCheckContext || '',
+            retiredContractMarkers: [...(registry.retiredContractMarkers || [])].sort(),
+            retiredModuleRoots: [...(registry.retiredModuleRoots || [])].sort(),
+            retiredPaths: [...(registry.retiredPaths || [])].sort(),
+          };
+          const actualDigest = crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');
+          if (registry.policyDigest !== EXPECTED_POLICY_DIGEST || actualDigest !== EXPECTED_POLICY_DIGEST) {
+            console.error(`Retirement policy drift: expected=${EXPECTED_POLICY_DIGEST} declared=${registry.policyDigest || 'missing'} actual=${actualDigest}`);
+            process.exit(1);
+          }
+
           const files = cp.execSync('git ls-files -z').toString('utf8').split('\0').filter(Boolean);
           const fileSet = new Set(files);
           const retiredPaths = new Set(registry.retiredPaths || []);
           const roots = (registry.retiredModuleRoots || []).map(canonical);
-
           function canonical(input) {
             let value = posix.normalize(String(input || '')).replace(/^\.\//, '');
             value = value.replace(/\.(?:[cm]?[jt]sx?|css|json)$/i, '');
@@ -182,18 +171,16 @@ jobs:
             const candidate = canonical(input);
             return roots.some((root) => candidate === root || candidate.startsWith(`${root}/`));
           }
-
           const exact = files.filter((file) => retiredPaths.has(file));
           const aliases = files.filter(matchesRoot);
           const missingGuards = (registry.guardPaths || []).filter((file) => !fileSet.has(file));
           const violations = [...new Set([...exact, ...aliases])];
-
           if (violations.length || missingGuards.length) {
             if (violations.length) console.error('Retired path/module aliases on main:', violations.join(', '));
             if (missingGuards.length) console.error('Missing guard paths:', missingGuards.join(', '));
             process.exit(1);
           }
-          console.log('Main tree retirement registry clean; no directory-module aliases present.');
+          console.log('Main tree retirement policy digest and registry are intact.');
           NODE
       - name: Run LoopDeck sentry
         working-directory: loopdeck
