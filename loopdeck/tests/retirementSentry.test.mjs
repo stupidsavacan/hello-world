@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { posix, resolve } from 'node:path';
 
-const EXPECTED_POLICY_DIGEST = 'd123940b668f9dc7b17f9358eb8165770b2f9d5617f468fc24c59f18567655bb';
+const EXPECTED_POLICY_DIGEST = '37243f8838a016c7a53d5e4605b946f3c75b571854cbe5ce5c5b25da54baa76f';
 const repoRoot = resolve(process.cwd(), '..');
 const registry = JSON.parse(readFileSync(resolve(repoRoot, '.retirement/retired-paths.json'), 'utf8'));
 const critical = {
@@ -43,4 +43,4 @@ const matchesRetiredModule = (input) => {
 const resurrected = files.filter((path) => retiredExact.has(path) || matchesRetiredModule(path));
 assert.deepEqual([...new Set(resurrected)], [], `LoopDeck sentry saw retired files or directory-module aliases: ${[...new Set(resurrected)].join(', ')}`);
 
-console.log('LoopDeck retirement sentry v3: policy digest, exact paths, and module aliases are quiet');
+console.log('LoopDeck retirement sentry v4: policy digest, exact paths, and module aliases are quiet');
