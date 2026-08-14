@@ -23,9 +23,23 @@ GitHub Actions run `31825206261` passed all of the following:
 
 This record is provenance only; it is not authorization to bypass the current Guard policy.
 
+## Historical full-product archive
+
+The last merged hello-world snapshot that restored the runnable LoopDeck browser/product spine together with the Android WebView wrapper is:
+
+`6a574ed3f7ad25f37c09bae77d8b937e78bfa3aa`
+
+It is pinned by the archival branch:
+
+`archive/loopdeck-last-green-6a574ed3`
+
+That commit is the merge of PR #173. The PR restored the canonical browser entry point, runtime/storage/validation/PDF/style spine, built-in data guards, and the Android project using JDK 17, SDK 35 and Gradle 8.10.2. Its Node 22 product CI passed all 131 tests; the Android workflow uses the same tests and Vite build before `assembleDebug` and requires an APK to be produced.
+
+This archival branch is a historical recovery anchor only. It does not change the v6 policy or reactivate LoopDeck on `main`.
+
 ## Preserved pre-retirement test snapshot
 
-PRs #224 and #226 subsequently removed all 18 non-Guard LoopDeck tests from `main`. Those deleted TypeScript tests cannot be re-added by an ordinary PR under the current v6 marker freeze without violating the retirement policy.
+PRs #224 and #226 removed all 18 non-Guard LoopDeck tests from `main`. PR #227 then appended every one of those 18 exact test paths, plus the temporary retirement-notice path, to the monotonic v6 ledger. Those deleted TypeScript tests therefore cannot be re-added by an ordinary PR under the current policy.
 
 The exact pre-deletion tree remains preserved at commit:
 
@@ -35,7 +49,7 @@ and is pinned by the archival branch:
 
 `archive/loopdeck-tests-pre-retirement-8495f963`
 
-That snapshot contains the historical contract/regression tests before the two deletion stages. They cover behavior including analytics, answer judging, choice generation, database migration, home grouping, inline-quiz images, native saves, pack assets and merging, question presentation, review scheduling/session behavior, worksheet PDF generation, wrong-answer explanations, and ZIP export. The post-merge Retirement Guard run for the preservation commit, `31826669213`, completed successfully.
+That snapshot contains the historical contract/regression tests before the deletion stages. They cover behavior including analytics, answer judging, choice generation, database migration, home grouping, inline-quiz images, native saves, pack assets and merging, question presentation, review scheduling/session behavior, worksheet PDF generation, wrong-answer explanations, and ZIP export. The post-merge Retirement Guard run for the preservation commit, `31826669213`, completed successfully.
 
 The archival branch is recovery evidence only. It does not reactivate retired runtime paths on `main`.
 
@@ -58,9 +72,9 @@ Canonical PR #22 is an **unmerged enhancement**, not the baseline above. Its hea
 
 ## Remaining LoopDeck material on main
 
-After PR #226, the non-Guard LoopDeck regression tests are no longer present on `main`; only Guard witness material remains in that area. This repository still does not contain an executable LoopDeck package: its source entry points, build configuration, built-in data path, Android wrapper, and later `loopdeck/client` migration path are retired.
+After PR #227, the non-Guard LoopDeck regression tests are absent and their exact paths are retired; only Guard witness material remains in that area. This repository still does not contain an executable LoopDeck package: its source entry points, build configuration, built-in data path, Android wrapper, and later `loopdeck/client` migration path are retired.
 
-For product recovery or behavior comparison, use the exact preserved commit/archival branch above together with the active canonical repository rather than attempting to recreate the deleted code through a namespace or extension loophole.
+For product recovery or behavior comparison, use the exact preserved commits/archival branches above together with the active canonical repository rather than attempting to recreate the deleted code through a namespace or extension loophole.
 
 ## Continuation rule
 
