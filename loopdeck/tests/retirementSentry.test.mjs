@@ -1,0 +1,11 @@
+import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+const repoRoot = resolve(process.cwd(), '..');
+const registry = JSON.parse(readFileSync(resolve(repoRoot, '.retirement/retired-paths.json'), 'utf8'));
+const companions = ['.github/workflows/retirement-guard.yml','mahjong/tests/retirement-sentry.test.js','loopdeck/tests/nativeSaveResult.test.ts','mahjong/tests/foundation.test.js'];
+const missing = companions.filter((path) => !existsSync(resolve(repoRoot, path)));
+assert.deepEqual(missing, [], `LoopDeck sentry lost companion guards: ${missing.join(', ')}`);
+const resurrected = registry.retiredPaths.filter((path) => existsSync(resolve(repoRoot, path)));
+assert.deepEqual(resurrected, [], `LoopDeck sentry saw resurrected paths: ${resurrected.join(', ')}`);
+console.log('LoopDeck retirement sentry: quiet');
