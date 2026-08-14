@@ -1,5 +1,3 @@
 # Retirement notice — non-Guard Mahjong tests
 
-Stage 1/4. The non-Guard test suite is entering staged retirement. Guard witness tests are explicitly excluded.
-
-No test file is changed or removed in this stage.
+Stage 2/4. Ten non-Guard tests have been removed; nine remain. Guard witness tests remain excluded.
