@@ -1,8 +1,8 @@
-// RETIREMENT NOTICE — stage 1/4
+// RETIREMENT NOTICE — stage 2/4
 //
-// TileLedger is scheduled for complete removal.
-// No runtime behavior changes in this stage.
-// Planned sequence: notice -> narrow accounting -> compatibility shell -> delete.
+// Detailed tile auditing is retired. The ledger now checks only total tile count,
+// null/missing instance IDs, and duplicate instance IDs while preserving result shape.
+// Remaining sequence: compatibility shell -> delete.
 
 (function attachTileLedger(global) {
   const Sanma = global.Sanma = global.Sanma || {};
@@ -14,7 +14,6 @@
   function inspect(state, ruleConfig) {
     const errors = [];
     const warnings = [];
-    const entries = [];
     const byId = Object.create(null);
     const counts = {
       wall: 0,
@@ -36,20 +35,12 @@
         errors.push(`instanceIdのない牌を検出しました: ${location}`);
         return;
       }
-      if (tile.isRed && !["p", "s"].includes(tile.suit)) {
-        warnings.push(`赤牌の牌種が不正です: ${tile.instanceId}`);
-      }
-      if (tile.isRed && tile.rank !== 5) {
-        warnings.push(`赤牌が5ではありません: ${tile.instanceId}`);
-      }
-      const entry = { instanceId: tile.instanceId, baseId: tile.baseId, location, tile };
-      entries.push(entry);
       counts[countKey] += 1;
       counts.total += 1;
       if (byId[tile.instanceId]) {
-        errors.push(`牌IDが重複しています: ${tile.instanceId} (${byId[tile.instanceId].location}, ${location})`);
+        errors.push(`牌IDが重複しています: ${tile.instanceId}`);
       } else {
-        byId[tile.instanceId] = entry;
+        byId[tile.instanceId] = true;
       }
     }
 
@@ -69,16 +60,12 @@
       ? wall.doraIndicators
       : (state && Array.isArray(state.doraIndicators) ? state.doraIndicators : []);
     counts.doraIndicators = doraIndicators.length;
-    doraIndicators.forEach((tile) => {
-      if (!tile || !tile.instanceId || !byId[tile.instanceId]) {
-        errors.push("ドラ表示牌が牌台帳に存在しません");
-      }
-    });
 
     const expected = expectedTileCount(ruleConfig || (state && state.ruleConfig));
     if (counts.total !== expected) {
       errors.push(`牌総数が不正です: ${counts.total}/${expected}`);
     }
+
     return {
       ok: errors.length === 0,
       errors,
