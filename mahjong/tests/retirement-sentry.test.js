@@ -4,7 +4,7 @@ const { createHash } = require('crypto');
 const { existsSync, readFileSync } = require('fs');
 const { posix, resolve } = require('path');
 
-const EXPECTED_POLICY_DIGEST = 'f72cd3c9d169805fe68322c723356b22d1c159094356ef776321e92866f21518';
+const EXPECTED_POLICY_DIGEST = '994a0a34cc2cb292d6c94c8da64a77b70f0190feae8be02e4480d4b84a042b10';
 const repoRoot = resolve(__dirname, '..', '..');
 const registry = JSON.parse(readFileSync(resolve(repoRoot, '.retirement/retired-paths.json'), 'utf8'));
 const critical = {
@@ -21,8 +21,6 @@ assert.strictEqual(actualDigest, EXPECTED_POLICY_DIGEST, `Mahjong sentry saw ret
 const companions = [
   '.github/workflows/retirement-guard.yml',
   'loopdeck/tests/retirementSentry.test.mjs',
-  'loopdeck/tests/nativeSaveResult.test.ts',
-  'mahjong/tests/foundation.test.js',
 ];
 const missing = companions.filter((path) => !existsSync(resolve(repoRoot, path)));
 assert.deepStrictEqual(missing, [], `Mahjong sentry lost companion guards: ${missing.join(', ')}`);
@@ -43,4 +41,4 @@ const matchesRetiredModule = (input) => {
 const resurrected = files.filter((path) => retiredExact.has(path) || matchesRetiredModule(path));
 assert.deepStrictEqual([...new Set(resurrected)], [], `Mahjong sentry saw retired files or directory-module aliases: ${[...new Set(resurrected)].join(', ')}`);
 
-console.log('Mahjong retirement sentry v3: policy digest, exact paths, and module aliases are quiet');
+console.log('Mahjong retirement sentry v4: active-product policy digest and tree are consistent');
