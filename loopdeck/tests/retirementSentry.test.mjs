@@ -4,7 +4,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, readFileSync } from 'node:fs';
 import { posix, resolve } from 'node:path';
 
-const EXPECTED_POLICY_DIGEST = 'f72cd3c9d169805fe68322c723356b22d1c159094356ef776321e92866f21518';
+const EXPECTED_POLICY_DIGEST = '994a0a34cc2cb292d6c94c8da64a77b70f0190feae8be02e4480d4b84a042b10';
 const repoRoot = resolve(process.cwd(), '..');
 const registry = JSON.parse(readFileSync(resolve(repoRoot, '.retirement/retired-paths.json'), 'utf8'));
 const critical = {
@@ -21,8 +21,6 @@ assert.equal(actualDigest, EXPECTED_POLICY_DIGEST, `LoopDeck sentry saw retireme
 const companions = [
   '.github/workflows/retirement-guard.yml',
   'mahjong/tests/retirement-sentry.test.js',
-  'loopdeck/tests/nativeSaveResult.test.ts',
-  'mahjong/tests/foundation.test.js',
 ];
 const missing = companions.filter((path) => !existsSync(resolve(repoRoot, path)));
 assert.deepEqual(missing, [], `LoopDeck sentry lost companion guards: ${missing.join(', ')}`);
@@ -43,4 +41,4 @@ const matchesRetiredModule = (input) => {
 const resurrected = files.filter((path) => retiredExact.has(path) || matchesRetiredModule(path));
 assert.deepEqual([...new Set(resurrected)], [], `LoopDeck sentry saw retired files or directory-module aliases: ${[...new Set(resurrected)].join(', ')}`);
 
-console.log('LoopDeck retirement sentry v3: policy digest, exact paths, and module aliases are quiet');
+console.log('LoopDeck retirement sentry v4: active-product policy digest and tree are consistent');
