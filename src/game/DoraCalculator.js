@@ -1,8 +1,18 @@
-// DEPRECATION NOTICE — STAGE 1/5
+// DEPRECATION NOTICE — STAGE 2/5
 //
-// DoraCalculator is entering a deliberately slow retirement sequence.
-// No runtime behavior changes in this stage. Further retirement stages should
-// only advance after additional implementation work has landed elsewhere.
+// DoraCalculator remains available under the same public API, but feature growth
+// is frozen and calculation behavior is intentionally narrowed in this stage.
+//
+// Retained for compatibility:
+// - indicator -> dora conversion
+// - normal dora counting
+// - red dora counting
+// - legacy result fields
+//
+// Retired in this stage:
+// - ura-dora calculation
+// - kita-dora calculation
+// - high-score indicator multipliers
 //
 // Planned sequence:
 // 1. announce retirement
@@ -43,31 +53,12 @@
     const ruleConfig = options.ruleConfig || {};
     const context = options.context || {};
     const indicators = Array.isArray(context.doraIndicators) ? context.doraIndicators : [];
-    const uraIndicators = context.isRiichi && ruleConfig.uraDora !== false
-      && Array.isArray(context.uraDoraIndicators)
-      ? context.uraDoraIndicators
-      : [];
     let normalDora = 0;
-    let uraDora = 0;
 
     const indicatorDetails = indicators.map((indicator) => {
       const doraBaseId = nextDoraBaseId(indicator);
       const matchingTiles = countMatchingTiles(tiles, doraBaseId);
-      const multiplier = ruleConfig.highScoreMode && indicator && indicator.isRed ? 2 : 1;
-      const han = matchingTiles * multiplier;
-      normalDora += han;
-      return {
-        indicatorBaseId: indicator && indicator.baseId ? indicator.baseId : null,
-        doraBaseId,
-        matchingTiles,
-        multiplier,
-        han,
-      };
-    });
-    const uraIndicatorDetails = uraIndicators.map((indicator) => {
-      const doraBaseId = nextDoraBaseId(indicator);
-      const matchingTiles = countMatchingTiles(tiles, doraBaseId);
-      uraDora += matchingTiles;
+      normalDora += matchingTiles;
       return {
         indicatorBaseId: indicator && indicator.baseId ? indicator.baseId : null,
         doraBaseId,
@@ -80,27 +71,20 @@
     const redDora = ruleConfig.redDoraMode === "none"
       ? 0
       : tiles.filter((tile) => tile && tile.isRed).length;
-    const kitaAsDora = !ruleConfig.advancedRules
-      || !ruleConfig.advancedRules.sanma
-      || ruleConfig.advancedRules.sanma.kitaAsDora !== false;
-    const kitaDora = ruleConfig.northMode === "kita-dora" && kitaAsDora
-      ? Math.max(0, Number(context.kitaDoraCount) || 0)
-      : 0;
     const items = [];
     if (normalDora > 0) items.push({ id: "dora", name: "ドラ", han: normalDora, isDora: true });
-    if (uraDora > 0) items.push({ id: "ura-dora", name: "裏ドラ", han: uraDora, isDora: true });
     if (redDora > 0) items.push({ id: "red-dora", name: "赤ドラ", han: redDora, isDora: true });
-    if (kitaDora > 0) items.push({ id: "kita-dora", name: "抜き北ドラ", han: kitaDora, isDora: true });
 
     return {
-      totalHan: normalDora + uraDora + redDora + kitaDora,
+      totalHan: normalDora + redDora,
       normalDora,
-      uraDora,
+      uraDora: 0,
       redDora,
-      kitaDora,
+      kitaDora: 0,
       items,
       indicatorDetails,
-      uraIndicatorDetails,
+      uraIndicatorDetails: [],
+      retirementStage: 2,
     };
   }
 
