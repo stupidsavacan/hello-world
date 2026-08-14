@@ -38,18 +38,27 @@ http://localhost:8000/mahjong/
 
 現在のUIとのstate差は `src/ui/CanonicalUiAdapter.js` で吸収し、牌譜イベント差は `src/ui/ReplayViewer.js` で互換化しています。これにより、canonical側の深い対局経路と、現在の牌表示・設定・牌譜・統計UIを同時に利用できます。
 
+旧compact engineの互換shim（`FlowCompat.js` / `GameEngine.part1–3.js`）は実行グラフから未使用であることを確認し、clean snapshotでは削除しています。実行経路はcanonical flow 1系統です。
+
 ## 検証
 
-このブランチ専用の **Mahjong Snapshot CI** が以下を自動検証します。
+このブランチ専用の **Mahjong Snapshot CI** は18系統の検証を実行します。
 
-- 固定seedの東風戦が最後まで終了すること
-- TileLedger の整合性が保たれること
-- CPUの伏せ手が公開stateへ漏れないこと
-- GameEngine の主要公開APIが存在すること
-- 鳴き後の牌譜リプレイで、鳴かれた牌が河から正しく除去されること
-- `mahjong/index.html` の実際のscript順でブラウザbootstrapが成立すること
+- 固定seedの東風戦E2E
+- `mahjong/index.html` の実script順によるbrowser bootstrap
+- SVG牌表示
+- 牌譜リプレイ本体とUI bootstrap
+- 設定export/importとUI bootstrap
+- 牌譜index検索・RecordsDashboard
+- 鳴き、advanced rules、CPU/assist
+- 手牌解析、integrity/recovery、match進行
+- 保存、点数計算、役判定
 
-最初の完全green確認: `fa42e1f83a3f0c1e4e453ec2440e780315076330`
+E2Eでは TileLedger の整合性、CPU伏せ手の非公開、GameEngine主要公開API、鳴き後の牌譜再構築も検査します。
+
+clean runtime確認済み head: `d80b8aab068a9757f18cbb51a3d8fda82c4bef63`
+
+このheadでは **Engine/replay E2E、Browser bootstrap smoke、Product regressions の全ステップがGitHub Actions上で success** になっています。
 
 ## main との関係
 
