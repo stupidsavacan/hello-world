@@ -1,8 +1,8 @@
-// RETIREMENT NOTICE — stage 5/12
+// RETIREMENT NOTICE — stage 6/12
 //
-// Interval growth no longer depends on each card's stored ease value.
-// Rating categories remain, but they now use fixed multipliers so interval policy is
-// deterministic across cards while the rest of the scheduler remains intact.
+// Automatic promotion into `leech` is retired in this stage.
+// Existing leech cards remain readable, bucketable, and countable for compatibility,
+// but new reviews no longer promote cards into that state.
 
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
@@ -81,7 +81,6 @@ function nextIntervalDays(previousIntervalDays: number, _ease: number, rating: R
   if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * 3.25));
   return 0;
 }
-function isLeech(card: ReviewCard): boolean { return card.lapseCount >= 3 || card.totalWrong >= 5 || card.wrongStreak >= 3; }
 function isMastered(card: ReviewCard): boolean { return card.correctStreak >= 5 && card.intervalDays >= 30 && card.lapseCount === 0; }
 function reviewLogId(questionId: string, reviewedAt: string): string { return `${reviewedAt}-${questionId}-${Math.random().toString(36).slice(2, 10)}`; }
 
@@ -114,10 +113,7 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
     next.state = 'review';
   }
 
-  if (isLeech(next)) {
-    next.state = 'leech';
-    next.leechLevel = Math.max(next.leechLevel, next.lapseCount, Math.floor(next.totalWrong / 2), next.wrongStreak);
-  } else if (isMastered(next)) next.state = 'mastered';
+  if (isMastered(next)) next.state = 'mastered';
   if (next.suspended) next.state = 'suspended';
 
   const log: ReviewLog = {
