@@ -1,3 +1,16 @@
+// DEPRECATION NOTICE
+//
+// AssistManager is entering a deliberate five-pull-request retirement sequence.
+// This first stage changes no runtime behavior. It exists only to make the
+// retirement explicit before any implementation is removed.
+//
+// Planned sequence:
+// 1. announce retirement
+// 2. disable mutation while preserving the public surface
+// 3. reduce to a compatibility shell
+// 4. leave only a tombstone
+// 5. delete the file
+
 (function attachAssistManager(global){
   const Sanma=global.Sanma=global.Sanma||{};
   function ids(state){const out=[],wall=state&&state.wall;['tiles','deadWall'].forEach(k=>(wall&&Array.isArray(wall[k])?wall[k]:[]).forEach(t=>t&&t.instanceId&&out.push(t.instanceId)));(state&&Array.isArray(state.players)?state.players:[]).forEach(p=>{['hand','discards','kitaTiles'].forEach(k=>(p&&Array.isArray(p[k])?p[k]:[]).forEach(t=>t&&t.instanceId&&out.push(t.instanceId)));(p&&Array.isArray(p.melds)?p.melds:[]).forEach(m=>(m&&Array.isArray(m.tiles)?m.tiles:[]).forEach(t=>t&&t.instanceId&&out.push(t.instanceId)));});return out;}
