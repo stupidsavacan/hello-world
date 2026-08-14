@@ -1,0 +1,7 @@
+name: v6 forbidden workflow canary
+on: [workflow_dispatch]
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'Guard v6 should reject this workflow addition before merge.'
