@@ -12,10 +12,13 @@ const chunkModules = import.meta.glob('../../data/builtin/questions/*.json', {
 }) as Record<string, QuestionChunk>;
 
 function sourcePackFromChunks(): LoopDeckPack {
-  const questions = Object.entries(chunkModules)
+  const meta = builtinMeta as unknown as BuiltinMeta;
+  const allQuestions = Object.entries(chunkModules)
     .sort(([left], [right]) => left.localeCompare(right))
     .flatMap(([, chunk]) => chunk);
-  const meta = builtinMeta as unknown as BuiltinMeta;
+  const questions = meta.modules.flatMap((module) =>
+    allQuestions.filter((question) => question.moduleId === module.id)
+  );
 
   const questionIdsByModule = new Map<string, string[]>();
   for (const question of questions) {
