@@ -1,9 +1,3 @@
-// RETIREMENT NOTICE — stage 7/12
-//
-// Automatic promotion into `mastered` is retired in this stage.
-// Existing mastered cards remain readable, bucketable, and countable for compatibility,
-// but successful reviews no longer move cards into that state.
-
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
 const DEFAULT_EASE = 2.5;
@@ -75,12 +69,14 @@ export function createReviewCard(questionId: string, moduleId: string, now = new
   };
 }
 
-function nextIntervalDays(previousIntervalDays: number, _ease: number, rating: ReviewRating): number {
-  if (rating === 'hard') return Math.max(1, Math.ceil(previousIntervalDays === 0 ? 1 : previousIntervalDays * 1.25));
-  if (rating === 'good') return Math.max(1, Math.ceil(previousIntervalDays === 0 ? 1 : previousIntervalDays * 2.5));
-  if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * 3.25));
+function nextIntervalDays(previousIntervalDays: number, ease: number, rating: ReviewRating): number {
+  if (rating === 'hard') return Math.max(1, Math.ceil(previousIntervalDays * 1.2));
+  if (rating === 'good') return Math.max(1, Math.ceil(previousIntervalDays === 0 ? 1 : previousIntervalDays * ease));
+  if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * ease * 1.3));
   return 0;
 }
+function isLeech(card: ReviewCard): boolean { return card.lapseCount >= 3 || card.totalWrong >= 5 || card.wrongStreak >= 3; }
+function isMastered(card: ReviewCard): boolean { return card.correctStreak >= 5 && card.intervalDays >= 30 && card.lapseCount === 0; }
 function reviewLogId(questionId: string, reviewedAt: string): string { return `${reviewedAt}-${questionId}-${Math.random().toString(36).slice(2, 10)}`; }
 
 export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating, result: AnswerResult, elapsedMs: number, options: ApplyReviewOptions = {}): ReviewScheduleResult {
@@ -99,6 +95,7 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
     next.totalWrong += 1;
     next.wrongStreak += 1;
     next.correctStreak = 0;
+    next.ease = clampEase(next.ease - 0.25);
     if (currentCard.state === 'review' || currentCard.state === 'mastered') next.lapseCount += 1;
     next.intervalDays = 0;
     next.dueAt = iso(addMinutes(now, AGAIN_DELAY_MINUTES));
@@ -107,11 +104,17 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
     next.totalCorrect += 1;
     next.correctStreak += 1;
     next.wrongStreak = 0;
+    if (rating === 'hard') next.ease = clampEase(next.ease - 0.15);
+    if (rating === 'easy') next.ease = clampEase(next.ease + 0.15);
     next.intervalDays = nextIntervalDays(currentCard.intervalDays, next.ease, rating);
     next.dueAt = iso(addDays(now, next.intervalDays));
     next.state = 'review';
   }
 
+  if (isLeech(next)) {
+    next.state = 'leech';
+    next.leechLevel = Math.max(next.leechLevel, next.lapseCount, Math.floor(next.totalWrong / 2), next.wrongStreak);
+  } else if (isMastered(next)) next.state = 'mastered';
   if (next.suspended) next.state = 'suspended';
 
   const log: ReviewLog = {
