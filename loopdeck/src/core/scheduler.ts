@@ -1,3 +1,15 @@
+// RETIREMENT NOTICE — stage 1/5
+//
+// This scheduler remains fully active in this stage. No runtime behavior changes here.
+// Its retirement will be deliberately paced behind ongoing implementation elsewhere:
+// 1. announce retirement
+// 2. narrow scheduling policy while preserving the public surface
+// 3. reduce to compatibility-only queueing
+// 4. leave a tombstone
+// 5. delete the file
+//
+// Later stages are intentionally deferred rather than bundled into this change.
+
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
 const DEFAULT_EASE = 2.5;
