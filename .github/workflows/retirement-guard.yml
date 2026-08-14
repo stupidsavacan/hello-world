@@ -21,35 +21,210 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const crypto=require('crypto'), posix=require('path').posix;
-            const {owner,repo}=context.repo, pr=context.payload.pull_request;
-            const EXPECTED='f72699a846a905d4e5062623bb231ea5c2d235b9cf48c71bc393f7b6abf06115', required='Retirement Guard / retirement-policy';
-            await github.rest.repos.createCommitStatus({owner,repo,sha:pr.head.sha,state:'pending',context:required,description:'Trusted retirement policy is running'});
-            const response=await github.rest.repos.getContent({owner,repo,path:'.retirement/retired-paths.json',ref:pr.base.sha});
-            const registry=JSON.parse(Buffer.from(response.data.content,'base64').toString('utf8'));
-            const critical={guardPaths:[...(registry.guardPaths||[])].sort(),requiredCheckContext:registry.requiredCheckContext||'',retiredContractMarkers:[...(registry.retiredContractMarkers||[])].sort(),retiredModuleRoots:[...(registry.retiredModuleRoots||[])].sort(),retiredPaths:[...(registry.retiredPaths||[])].sort()};
-            const actual=crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');
-            if(registry.policyDigest!==EXPECTED||actual!==EXPECTED){core.setFailed('Base retirement policy drifted.');return;}
-            const canonical=input=>{let v=posix.normalize(String(input||'')).replace(/^\.\//,'');v=v.replace(/\.(?:[cm]?[jt]sx?|css|json)$/i,'').replace(/\/index$/i,'');return v};
-            const retiredPaths=new Set(registry.retiredPaths||[]), roots=(registry.retiredModuleRoots||[]).map(canonical), markers=registry.retiredContractMarkers||[], guards=new Set(registry.guardPaths||[]);
-            const matches=input=>{const c=canonical(input);return roots.some(r=>c===r||c.startsWith(r+'/'))};
-            const files=await github.paginate(github.rest.pulls.listFiles,{owner,repo,pull_number:pr.number,per_page:100});
-            const violations=[];
-            for(const file of files){
-              if(file.status!=='removed'&&(retiredPaths.has(file.filename)||matches(file.filename)))violations.push(file.filename);
-              if(guards.has(file.filename))violations.push('guard:'+file.filename);
-              if(file.status==='removed'||!file.sha||!/\.(?:[cm]?[jt]sx?)$/i.test(file.filename))continue;
-              const blob=await github.rest.git.getBlob({owner,repo,file_sha:file.sha});const source=Buffer.from(blob.data.content,'base64').toString('utf8');
-              for(const marker of markers)if(source.includes(marker))violations.push(file.filename+' -> '+marker);
+            const crypto = require('crypto');
+            const posix = require('path').posix;
+            const { owner, repo } = context.repo;
+            const pr = context.payload.pull_request;
+            const required = 'Retirement Guard / retirement-policy';
+            const EXPECTED_ANCHOR = '71193fd4fd219e37e2c05147f2333d552f4f414a6037567daba1061d817b6a16';
+            const GUARD_WORKFLOW = '.github/workflows/retirement-guard.yml';
+
+            await github.rest.repos.createCommitStatus({
+              owner, repo, sha: pr.head.sha, state: 'pending', context: required,
+              description: 'Monotonic retirement policy is running'
+            });
+
+            async function readText(path, ref) {
+              const response = await github.rest.repos.getContent({ owner, repo, path, ref });
+              if (Array.isArray(response.data) || !('content' in response.data)) throw new Error(`Missing ${path} at ${ref}`);
+              return Buffer.from(response.data.content || '', 'base64').toString('utf8');
             }
-            if(violations.length){core.setFailed('Retirement contract violated: '+[...new Set(violations)].join(' | '));return;}
-            core.info('Retirement contract clean.');
+
+            const anchor = JSON.parse(await readText('.retirement/retired-paths.json', pr.base.sha));
+            const critical = {
+              guardPaths: [...(anchor.guardPaths || [])].sort(),
+              ledgerPath: anchor.ledgerPath || '',
+              policyVersion: anchor.policyVersion || 0,
+              requiredCheckContext: anchor.requiredCheckContext || '',
+              retiredContractMarkers: [...(anchor.retiredContractMarkers || [])].sort(),
+              retiredModuleRoots: [...(anchor.retiredModuleRoots || [])].sort(),
+              retiredPaths: [...(anchor.retiredPaths || [])].sort(),
+              workflowPolicy: anchor.workflowPolicy || '',
+            };
+            const actualAnchor = crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');
+            if (
+              anchor.policyDigest !== EXPECTED_ANCHOR ||
+              actualAnchor !== EXPECTED_ANCHOR ||
+              anchor.policyVersion !== 6 ||
+              anchor.ledgerPath !== '.retirement/retirement-ledger.jsonl' ||
+              anchor.workflowPolicy !== 'non-guard-workflows-delete-only'
+            ) {
+              core.setFailed(`Immutable v6 anchor drifted. declared=${anchor.policyDigest || 'missing'} actual=${actualAnchor}`);
+              return;
+            }
+
+            function canonicalModulePath(input) {
+              let value = posix.normalize(String(input || '')).replace(/^\.\//, '');
+              value = value.replace(/\.(?:[cm]?[jt]sx?|css|json)$/i, '');
+              value = value.replace(/\/index$/i, '');
+              return value;
+            }
+            function moduleMatches(candidate, root) {
+              return candidate === root || candidate.startsWith(`${root}/`) || candidate.startsWith(`${root}.`);
+            }
+            function parseLedger(text) {
+              const entries = [];
+              const lines = String(text || '').split('\n');
+              for (let i = 0; i < lines.length; i += 1) {
+                const line = lines[i];
+                if (!line.trim()) continue;
+                let value;
+                try { value = JSON.parse(line); } catch (error) { throw new Error(`Ledger line ${i + 1} is not JSON`); }
+                if (!value || Array.isArray(value) || typeof value !== 'object') throw new Error(`Ledger line ${i + 1} must be an object`);
+                const keys = Object.keys(value);
+                if (keys.length !== 1 || !['path', 'moduleRoot', 'marker'].includes(keys[0])) {
+                  throw new Error(`Ledger line ${i + 1} must contain exactly one of path/moduleRoot/marker`);
+                }
+                const key = keys[0];
+                const item = String(value[key] || '').trim();
+                if (!item) throw new Error(`Ledger line ${i + 1} has an empty ${key}`);
+                if (key === 'path' && (item === 'README.md' || item.startsWith('.retirement/') || item === GUARD_WORKFLOW || (anchor.guardPaths || []).includes(item))) {
+                  throw new Error(`Ledger may not retire protected path ${item}`);
+                }
+                if (key === 'moduleRoot' && (canonicalModulePath(item) === 'README' || item.startsWith('.retirement') || item.startsWith('.github/workflows'))) {
+                  throw new Error(`Ledger may not retire protected module root ${item}`);
+                }
+                entries.push({ key, item });
+              }
+              return entries;
+            }
+
+            const baseLedger = await readText(anchor.ledgerPath, pr.base.sha);
+            let headLedger = baseLedger;
+            const files = await github.paginate(github.rest.pulls.listFiles, {
+              owner, repo, pull_number: pr.number, per_page: 100
+            });
+            const fileMap = new Map(files.map((file) => [file.filename, file]));
+            const violations = [];
+
+            for (const guardPath of anchor.guardPaths || []) {
+              if (fileMap.has(guardPath)) violations.push(`immutable-guard:${guardPath}`);
+            }
+
+            for (const file of files.filter((f) => f.filename.startsWith('.github/workflows/'))) {
+              if (file.filename === GUARD_WORKFLOW) {
+                violations.push(`immutable-guard:${file.filename}`);
+              } else if (file.status !== 'removed') {
+                violations.push(`workflow-policy:${file.filename}:${file.status}`);
+              }
+            }
+
+            const ledgerChange = fileMap.get(anchor.ledgerPath);
+            let appendedEntries = [];
+            if (ledgerChange) {
+              if (ledgerChange.status !== 'modified') {
+                violations.push(`ledger-status:${ledgerChange.status}`);
+              } else {
+                headLedger = await readText(anchor.ledgerPath, pr.head.sha);
+                if (!headLedger.startsWith(baseLedger)) {
+                  violations.push('ledger-rewrite:not-append-only');
+                } else {
+                  try {
+                    parseLedger(baseLedger);
+                    appendedEntries = parseLedger(headLedger.slice(baseLedger.length));
+                  } catch (error) {
+                    violations.push(`ledger-parse:${error.message}`);
+                  }
+                }
+              }
+            }
+
+            let baseEntries = [];
+            try { baseEntries = parseLedger(baseLedger); } catch (error) { violations.push(`base-ledger:${error.message}`); }
+
+            const retiredPaths = new Set(anchor.retiredPaths || []);
+            const retiredRoots = new Set((anchor.retiredModuleRoots || []).map(canonicalModulePath));
+            const retiredMarkers = new Set(anchor.retiredContractMarkers || []);
+            for (const { key, item } of [...baseEntries, ...appendedEntries]) {
+              if (key === 'path') retiredPaths.add(item);
+              if (key === 'moduleRoot') retiredRoots.add(canonicalModulePath(item));
+              if (key === 'marker') retiredMarkers.add(item);
+            }
+
+            for (const { key, item } of appendedEntries) {
+              if (key !== 'path') continue;
+              try {
+                const response = await github.rest.repos.getContent({ owner, repo, path: item, ref: pr.base.sha });
+                if (!Array.isArray(response.data) && fileMap.get(item)?.status !== 'removed') {
+                  violations.push(`retirement-must-delete:${item}`);
+                }
+              } catch (error) {
+                if (error.status !== 404) throw error;
+              }
+            }
+
+            const roots = [...retiredRoots];
+            const matchesRetiredModule = (input) => {
+              const candidate = canonicalModulePath(input);
+              return roots.some((root) => moduleMatches(candidate, root));
+            };
+            function resolveSpecifier(filename, specifier) {
+              if (!specifier) return null;
+              if (specifier.startsWith('.')) return canonicalModulePath(posix.join(posix.dirname(filename), specifier));
+              if (specifier.startsWith('/')) return canonicalModulePath(specifier.slice(1));
+              if (specifier.startsWith('loopdeck/') || specifier.startsWith('mahjong/')) return canonicalModulePath(specifier);
+              return null;
+            }
+            function collectSpecifiers(source) {
+              const found = new Set();
+              const patterns = [
+                /\b(?:import|export)\s+(?:[^'\"]*?\s+from\s*)?['\"]([^'\"]+)['\"]/g,
+                /\brequire\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/g,
+                /\brequire\.resolve\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/g,
+                /\bimport\s*\(\s*['\"]([^'\"]+)['\"]\s*\)/g,
+              ];
+              for (const pattern of patterns) for (const match of source.matchAll(pattern)) found.add(match[1]);
+              return [...found];
+            }
+
+            const liveFiles = files.filter((file) => file.status !== 'removed');
+            for (const file of liveFiles) {
+              if (retiredPaths.has(file.filename)) violations.push(`retired-path:${file.filename}`);
+              if (matchesRetiredModule(file.filename)) violations.push(`retired-module:${file.filename}`);
+              if (!file.sha || !/\.(?:[cm]?[jt]sx?)$/i.test(file.filename)) continue;
+              const blob = await github.rest.git.getBlob({ owner, repo, file_sha: file.sha });
+              const source = blob.data.encoding === 'base64'
+                ? Buffer.from(blob.data.content, 'base64').toString('utf8')
+                : String(blob.data.content || '');
+              for (const marker of retiredMarkers) if (source.includes(marker)) violations.push(`retired-marker:${file.filename}->${marker}`);
+              for (const specifier of collectSpecifiers(source)) {
+                const resolved = resolveSpecifier(file.filename, specifier);
+                if (resolved && roots.some((root) => moduleMatches(resolved, root))) {
+                  violations.push(`retired-import:${file.filename}->${specifier}`);
+                }
+              }
+            }
+
+            if (violations.length) {
+              core.setFailed('Monotonic README-only retirement violated: ' + [...new Set(violations)].join(' | '));
+              return;
+            }
+            core.info(`Monotonic retirement clean. appendedLedgerEntries=${appendedEntries.length}`);
+
       - if: always()
         uses: actions/github-script@v7
         with:
           script: |
-            const pr=context.payload.pull_request, outcome='${{ steps.guard.outcome }}';
-            await github.rest.repos.createCommitStatus({owner:context.repo.owner,repo:context.repo.repo,sha:pr.head.sha,state:outcome==='success'?'success':'failure',context:'Retirement Guard / retirement-policy',description:outcome==='success'?'Retirement policy passed':'Retirement policy rejected this pull request'});
+            const pr = context.payload.pull_request;
+            const outcome = '${{ steps.guard.outcome }}';
+            await github.rest.repos.createCommitStatus({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              sha: pr.head.sha,
+              state: outcome === 'success' ? 'success' : 'failure',
+              context: 'Retirement Guard / retirement-policy',
+              description: outcome === 'success' ? 'Monotonic retirement policy passed' : 'Monotonic retirement policy rejected this pull request'
+            });
 
   current-tree:
     if: github.event_name == 'push'
@@ -58,15 +233,83 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: 22}
-      - name: Verify current tree
+        with:
+          node-version: 22
+      - name: Verify immutable anchor, append-only aggregate, and workflow authority
         run: |
           node <<'NODE'
-          const crypto=require('crypto'),fs=require('fs'),cp=require('child_process'),posix=require('path').posix;
-          const EXPECTED='f72699a846a905d4e5062623bb231ea5c2d235b9cf48c71bc393f7b6abf06115',r=JSON.parse(fs.readFileSync('.retirement/retired-paths.json','utf8'));
-          const critical={guardPaths:[...(r.guardPaths||[])].sort(),requiredCheckContext:r.requiredCheckContext||'',retiredContractMarkers:[...(r.retiredContractMarkers||[])].sort(),retiredModuleRoots:[...(r.retiredModuleRoots||[])].sort(),retiredPaths:[...(r.retiredPaths||[])].sort()};
-          const actual=crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');if(r.policyDigest!==EXPECTED||actual!==EXPECTED)process.exit(1);
-          const files=cp.execSync('git ls-files -z').toString().split('\0').filter(Boolean),set=new Set(files);const canonical=input=>{let v=posix.normalize(String(input||'')).replace(/^\.\//,'');return v.replace(/\.(?:[cm]?[jt]sx?|css|json)$/i,'').replace(/\/index$/i,'')};const roots=(r.retiredModuleRoots||[]).map(canonical);const bad=files.filter(f=>(r.retiredPaths||[]).includes(f)||roots.some(x=>canonical(f)===x||canonical(f).startsWith(x+'/')));const missing=(r.guardPaths||[]).filter(f=>!set.has(f));if(bad.length||missing.length){console.error({bad,missing});process.exit(1)}
+          const crypto = require('crypto');
+          const fs = require('fs');
+          const cp = require('child_process');
+          const posix = require('path').posix;
+          const EXPECTED = '71193fd4fd219e37e2c05147f2333d552f4f414a6037567daba1061d817b6a16';
+          const GUARD = '.github/workflows/retirement-guard.yml';
+          const anchor = JSON.parse(fs.readFileSync('.retirement/retired-paths.json', 'utf8'));
+          const critical = {
+            guardPaths: [...(anchor.guardPaths || [])].sort(),
+            ledgerPath: anchor.ledgerPath || '',
+            policyVersion: anchor.policyVersion || 0,
+            requiredCheckContext: anchor.requiredCheckContext || '',
+            retiredContractMarkers: [...(anchor.retiredContractMarkers || [])].sort(),
+            retiredModuleRoots: [...(anchor.retiredModuleRoots || [])].sort(),
+            retiredPaths: [...(anchor.retiredPaths || [])].sort(),
+            workflowPolicy: anchor.workflowPolicy || '',
+          };
+          const actual = crypto.createHash('sha256').update(JSON.stringify(critical)).digest('hex');
+          if (anchor.policyDigest !== EXPECTED || actual !== EXPECTED || anchor.policyVersion !== 6 || anchor.workflowPolicy !== 'non-guard-workflows-delete-only') {
+            console.error('Immutable v6 anchor drift', { declared: anchor.policyDigest, actual });
+            process.exit(1);
+          }
+
+          function canonical(input) {
+            let value = posix.normalize(String(input || '')).replace(/^\.\//, '');
+            return value.replace(/\.(?:[cm]?[jt]sx?|css|json)$/i, '').replace(/\/index$/i, '');
+          }
+          function moduleMatches(candidate, root) {
+            return candidate === root || candidate.startsWith(`${root}/`) || candidate.startsWith(`${root}.`);
+          }
+          function parseLedger(text) {
+            const out = [];
+            for (const [index, line] of String(text || '').split('\n').entries()) {
+              if (!line.trim()) continue;
+              const value = JSON.parse(line);
+              const keys = Object.keys(value || {});
+              if (keys.length !== 1 || !['path', 'moduleRoot', 'marker'].includes(keys[0])) throw new Error(`Bad ledger line ${index + 1}`);
+              const item = String(value[keys[0]] || '').trim();
+              if (!item) throw new Error(`Empty ledger line ${index + 1}`);
+              out.push({ key: keys[0], item });
+            }
+            return out;
+          }
+
+          const entries = parseLedger(fs.readFileSync(anchor.ledgerPath, 'utf8'));
+          const retiredPaths = new Set(anchor.retiredPaths || []);
+          const retiredRoots = new Set((anchor.retiredModuleRoots || []).map(canonical));
+          for (const entry of entries) {
+            if (entry.key === 'path') retiredPaths.add(entry.item);
+            if (entry.key === 'moduleRoot') retiredRoots.add(canonical(entry.item));
+          }
+          const files = cp.execSync('git ls-files -z').toString('utf8').split('\0').filter(Boolean);
+          const fileSet = new Set(files);
+          const roots = [...retiredRoots];
+          const bad = files.filter((file) => retiredPaths.has(file) || roots.some((root) => moduleMatches(canonical(file), root)));
+          const missingGuards = (anchor.guardPaths || []).filter((file) => !fileSet.has(file));
+          if (bad.length || missingGuards.length) {
+            console.error('Current tree violates retirement', { bad, missingGuards });
+            process.exit(1);
+          }
+
+          for (const file of files.filter((path) => path.startsWith('.github/workflows/') && path !== GUARD)) {
+            const source = fs.readFileSync(file, 'utf8');
+            if (source.includes('Retirement Guard / retirement-policy') || source.includes('createCommitStatus') || /statuses\s*:\s*write/.test(source)) {
+              console.error(`Non-Guard workflow has retirement-status authority: ${file}`);
+              process.exit(1);
+            }
+          }
+          console.log(`Guard v6 current tree clean; ledger entries=${entries.length}`);
           NODE
-      - run: node loopdeck/tests/retirementSentry.test.mjs
-      - run: node mahjong/tests/retirement-sentry.test.js
+      - name: Run LoopDeck sentry
+        working-directory: loopdeck
+        run: node tests/retirementSentry.test.mjs
+      - name: Run Mahjong sentry
+        run: node mahjong/tests/retirement-sentry.test.js
