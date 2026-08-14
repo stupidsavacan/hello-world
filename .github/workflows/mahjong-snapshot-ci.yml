@@ -20,10 +20,17 @@ jobs:
         run: node mahjong/snapshot-tests/engine-e2e.test.js
       - name: Browser bootstrap smoke
         run: node mahjong/snapshot-tests/browser-smoke.test.js
-      - name: Core product regressions
+      - name: Product regressions
         run: |
           set -euo pipefail
           tests=(
+            mahjong/tests/tile-face-bootstrap.test.js
+            mahjong/tests/replay-viewer-core.test.js
+            mahjong/tests/replay-panel-bootstrap.test.js
+            mahjong/tests/settings-export-import-core.test.js
+            mahjong/tests/settings-transfer-bootstrap.test.js
+            mahjong/tests/record-index-filter.test.js
+            mahjong/tests/records-dashboard-bootstrap.test.js
             mahjong/tests/action-calls-core.test.js
             mahjong/tests/advanced-rules-core.test.js
             mahjong/tests/cpu-assist-core.test.js
