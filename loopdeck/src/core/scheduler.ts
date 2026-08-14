@@ -1,9 +1,3 @@
-// RETIREMENT NOTICE — stage 3/12
-//
-// Adaptive answer-speed grading is retired in this stage.
-// Correct answers now map to `good`; wrong/revealed answers map to `again`.
-// The public function signature remains intact so callers do not need to move yet.
-
 import type { AnswerFormat, AnswerResult, ReviewCard, ReviewLog, ReviewRating, ReviewState } from './models';
 
 const DEFAULT_EASE = 2.5;
@@ -57,8 +51,12 @@ function isSuspended(card: ReviewCard): boolean { return card.suspended || card.
 
 export function clampEase(ease: number): number { return Math.min(MAX_EASE, Math.max(MIN_EASE, ease)); }
 
-export function inferReviewRating(result: AnswerResult, _elapsedMs: number, _answerMode: AnswerFormat = 'input'): ReviewRating {
-  return result === 'correct' ? 'good' : 'again';
+export function inferReviewRating(result: AnswerResult, elapsedMs: number, answerMode: AnswerFormat = 'input'): ReviewRating {
+  if (result !== 'correct') return 'again';
+  const [fast, slow] = answerMode === 'choice' ? [4500, 12000] : [7000, 20000];
+  if (elapsedMs <= fast) return 'easy';
+  if (elapsedMs >= slow) return 'hard';
+  return 'good';
 }
 
 export function createReviewCard(questionId: string, moduleId: string, now = new Date()): ReviewCard {
