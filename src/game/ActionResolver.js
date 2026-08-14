@@ -1,3 +1,21 @@
+// RETIREMENT 1/10 — IDENTITY AUDIT
+//
+// This path is named ActionResolver.js, but the resurrection festival attached
+// the historical CpuStrategy.js blob to it. Runtime behavior is intentionally
+// unchanged in this stage. The mismatch is now documented before dismantling.
+//
+// Planned sequence:
+// 1. document the body-swap
+// 2. retire call selection
+// 3. retire live-tile valuation
+// 4. retire risk penalties
+// 5. retire hand-value bonuses
+// 6. retire shape heuristics
+// 7. reduce shanten estimation
+// 8. collapse to a compatibility shell
+// 9. leave a tombstone
+// 10. delete the file
+
 (function attachCpuStrategy(global){
   const Sanma=global.Sanma=global.Sanma||{};
   const seq=i=>(i>=9&&i<=17)||(i>=18&&i<=26);
