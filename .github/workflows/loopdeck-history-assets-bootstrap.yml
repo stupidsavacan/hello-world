@@ -1,0 +1,62 @@
+name: LoopDeck History Asset Bootstrap
+
+on:
+  push:
+    branches:
+      - agent/loopdeck-history-assets
+    paths:
+      - .github/workflows/loopdeck-history-assets-bootstrap.yml
+
+jobs:
+  import-canonical-history-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Fetch and verify canonical LoopDeck history images
+        shell: bash
+        run: |
+          set -euo pipefail
+          target="loopdeck/public/images/history"
+          mkdir -p "$target"
+
+          fetch_asset() {
+            local name="$1"
+            local expected="$2"
+            curl --fail --location --retry 3 \
+              "https://raw.githubusercontent.com/stupidsavacan/LoopDeck/main/public/images/history/${name}" \
+              --output "${target}/${name}"
+            actual="$(git hash-object "${target}/${name}")"
+            if [ "$actual" != "$expected" ]; then
+              echo "::error file=${target}/${name}::Canonical blob mismatch: expected $expected, got $actual"
+              exit 1
+            fi
+          }
+
+          fetch_asset graph63.png 653fe9ec8ab555a4426f36b78069f3826de66a35
+          fetch_asset map62.png cd0926c65c6c3aeb4cec7de6fbf02b061681a97e
+          fetch_asset map64.png 319aea6f42fe3c2f02ccfb0e31eee17be7c13e51
+          fetch_asset relation63.png c9b87a533866e58a8b85de442cd14c0850671a45
+
+          git status --short -- "$target"
+
+      - name: Commit verified binary assets to this branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -- \
+            loopdeck/public/images/history/graph63.png \
+            loopdeck/public/images/history/map62.png \
+            loopdeck/public/images/history/map64.png \
+            loopdeck/public/images/history/relation63.png
+          if git diff --cached --quiet; then
+            echo "Canonical history assets are already present."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "Add canonical LoopDeck history image binaries"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
