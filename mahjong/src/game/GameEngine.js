@@ -1,3 +1,17 @@
+// RETIREMENT NOTICE — STAGE 1/4
+//
+// GameEngine has entered the standard four-part retirement sequence.
+// This stage changes no runtime behavior. The table still deals, draws,
+// advances turns, records events, and exposes the same public API.
+//
+// Planned sequence:
+// 1. announce retirement
+// 2. remove orchestration responsibility
+// 3. reduce to compatibility shell
+// 4. delete the file
+//
+// 墓前予告: 卓はまだ動く。だが、もう永住者ではない。
+
 (function attachGameEngine(global){
 const Sanma=global.Sanma=global.Sanma||{};
 const clone=v=>JSON.parse(JSON.stringify(v));
