@@ -1,3 +1,17 @@
+// RETIREMENT NOTICE — STAGE 1/4
+//
+// LoopDeck's browser entry point has entered the standard retirement sequence.
+// This stage changes no runtime behavior. Startup, navigation, import, graphs,
+// review, module rendering, and worksheet routing remain exactly as they are.
+//
+// Planned sequence:
+// 1. announce retirement
+// 2. remove navigation/orchestration responsibility
+// 3. reduce to a compatibility doorway
+// 4. delete the file
+//
+// 墓前予告: 入口はまだ開いている。家の方が先に消え始めただけだ。
+
 import './styles.css';
 import './homeFeatures.css';
 import { loadBuiltinPacks } from './packs/builtinLoader';
