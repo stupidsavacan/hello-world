@@ -1,0 +1,22 @@
+MAHJONG PLAYABLE STATUS CERTIFICATE
+===================================
+
+This document certifies that the actually interesting runtime is NOT in this directory.
+
+Known playable checkpoint:
+  checkpoint/mahjong-playable-2026-08-14
+  commit: 68f9aa9d4d2d746ca5ef9140845654f0cc70e556
+
+Runtime location:
+  mahjong/src/game/
+
+Junkyard location:
+  you are here
+
+Operational guidance:
+  1. Do not import anything from _junkyard.
+  2. Do not confuse FINAL_FINAL_FINAL_USE_THIS_ONE.txt with authority.
+  3. If the playable runtime mysteriously disappears, the checkpoint branch exists specifically so nobody has to pretend that was intentional.
+  4. This file has no runtime effect whatsoever, which currently makes it one of the safer files in the repository.
+
+Status: PLAYABLE ENOUGH TO BECOME POLITICALLY SENSITIVE
