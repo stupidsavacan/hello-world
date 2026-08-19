@@ -177,3 +177,4 @@
 {"path":"mahjong/tests/tile-face-bootstrap.test.js"}
 {"path":"mahjong/tests/yaku-analysis.test.js"}
 {"path":"mahjong/tests/RETIREMENT-NOTICE.md"}
+{"moduleRoot":"mahjong/client"}
