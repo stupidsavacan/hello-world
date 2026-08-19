@@ -65,3 +65,5 @@ For product recovery or behavior comparison, use the exact preserved commit/arch
 ## Continuation rule
 
 Runtime implementation should continue in the canonical `stupidsavacan/LoopDeck` repository unless this repository's owners intentionally adopt a new policy through a legitimate governance change. Do not rename or relocate runtime code solely to evade the retirement policy.
+
+<!-- V6.1 Guard smoke test: permitted README-only PR; do not merge. -->
