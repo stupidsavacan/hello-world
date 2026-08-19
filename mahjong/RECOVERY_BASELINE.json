@@ -1,0 +1,13 @@
+{
+  "purpose": "MAJAN II public recovery anchor for the last known-green integrated Mahjong product",
+  "baselinePr": 197,
+  "baselineCommit": "266fd6d48a080e0cc412720aae30ee111d24e377",
+  "baselineTree": "b01a8f1e8c9feddd9de5f92656f7c7bbbbe16ba3",
+  "baselineMahjongTree": "aff2cb3086af7812c9d7d069c8489d4ebce59e64",
+  "baselineSourceTree": "277e286c2657a7764cfa45e3f7ead80d54a8b011",
+  "entrypointBlob": "8ee6022443f8fc7be4ebe80ab78a1ecb1771339f",
+  "gameEngineBlob": "7790903194ce44f4e25e7c9191e1413f365c2147",
+  "renderTilesBlob": "5625e4f771369d5503286cbbbf1dc70d96707969",
+  "mainBlob": "ea2688c888c9dfbf6b208c42d6ab584822bec095",
+  "notes": "Historical _junkyard content is intentionally excluded from recovery. Current V6.1 protected witnesses override historical witness copies. This anchor is recovery evidence, not authority over later verified product improvements."
+}
