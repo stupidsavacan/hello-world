@@ -1,25 +1,10 @@
 {
-  "policy": "V6 retirement history with a signed V6.1 Crown active overlay and an armed exact README-only terminal transition.",
-  "policyVersion": 7,
-  "policyLabel": "v6.1",
+  "policy": "README-only end state. The v6 anchor is immutable. Retirement can only grow through append-only JSONL entries; there is no active/unretire operation.",
+  "policyVersion": 6,
   "requiredCheckContext": "Retirement Guard / retirement-policy",
-  "policyDigest": "5186bc43c64d728f339b36de23c04a721002b56a7dc5e674133690da857f5b6d",
+  "policyDigest": "71193fd4fd219e37e2c05147f2333d552f4f414a6037567daba1061d817b6a16",
   "ledgerPath": ".retirement/retirement-ledger.jsonl",
   "workflowPolicy": "non-guard-workflows-delete-only",
-  "guardWorkflowPath": ".github/workflows/retirement-guard.yml",
-  "crownConfigPath": ".crown/crown-config.json",
-  "crownLedgerPath": ".crown/crown-ledger.jsonl",
-  "crownProtocol": "hello-world-crown-v1",
-  "crownProtectedPaths": [
-    ".retirement/retired-paths.json",
-    ".github/workflows/retirement-guard.yml",
-    "loopdeck/tests/retirementSentry.test.mjs",
-    "loopdeck/tests/nativeSaveResult.test.ts",
-    "mahjong/tests/retirement-sentry.test.js",
-    "mahjong/tests/foundation.test.js",
-    ".crown/crown-config.json",
-    ".crown/NOTICE.md"
-  ],
   "retiredPaths": [
     "loopdeck/.gitignore",
     "loopdeck/src/core/analyticsEngine.ts",
@@ -124,9 +109,6 @@
     "loopdeck/tests/retirementSentry.test.mjs",
     "mahjong/tests/retirement-sentry.test.js",
     "loopdeck/tests/nativeSaveResult.test.ts",
-    "mahjong/tests/foundation.test.js",
-    ".crown/crown-config.json",
-    ".crown/crown-ledger.jsonl",
-    ".crown/NOTICE.md"
+    "mahjong/tests/foundation.test.js"
   ]
 }
