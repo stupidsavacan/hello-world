@@ -5,10 +5,10 @@
     "crypto.mjs": "de5505a31e85d78ceb8b74de16db4c019d97fce005d0e3396e766584cb972508",
     "canonical.mjs": "2c8da018a9612bc2c7ead2b6537cbd6dcc726f7c51e00f96cd27706d4fdfb2a7",
     "challenge.mjs": "d93a8c5513febe7eb28c83c42fc5da4510f3e8bde7e6396df3b1b8b25dc664fb",
-    "compatibility-records.mjs": "0812cb39b7c7486476a4772930660d6cb998ff1bec6c815b40d94dbaa41a14e4",
-    "protocol-v62.mjs": "0f005c083eed7f38d84675797f8d1fa821eaee02a6fec0c404943ff116622ad7",
+    "compatibility-records.mjs": "91e65ae5cf4c627f7afe058846eaeca543586e64c9d939f538ae5c3754b126e2",
+    "protocol-v62.mjs": "bcc16ef81883f92e5242478f402f53e28802b1365887ece5dc99137ba60daab5",
     "guard-policy-v62.mjs": "9b0aa0f4b58116b6eb901f3e2c0e072244b1d4f9984d60fc8d5cb5950b5e7390",
     "github-adapter-v62.mjs": "a6a061cce4bd85d27070052a9a305d315224afe21e7bf0680b5800235eeba99f"
   },
-  "rootSha256": "5d789c4e46415617a40efaf5554f85ea690bcf04fa0fab92e5a16bd7a6eba655"
+  "rootSha256": "013a71c05ec5700f1cf7a8ba0cbcda27b92f81579dbf8df53a883b80eb2fde0b"
 }

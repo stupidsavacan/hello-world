@@ -1,4 +1,4 @@
-profile=r2
+profile=r3
 line_endings=lf
 unicode=nfkc
 integer=u32be

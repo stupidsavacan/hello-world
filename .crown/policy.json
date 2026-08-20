@@ -15,7 +15,7 @@
     "candidateTargetMin": 2,
     "candidateTargetMax": 12,
     "resourceBudget": 6000,
-    "guardReleaseDigest": "5d789c4e46415617a40efaf5554f85ea690bcf04fa0fab92e5a16bd7a6eba655",
+    "guardReleaseDigest": "013a71c05ec5700f1cf7a8ba0cbcda27b92f81579dbf8df53a883b80eb2fde0b",
     "configProfile": "v62-compatible",
     "retirementPolicyMode": "crown-governed"
   },
