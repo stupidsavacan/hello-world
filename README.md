@@ -10,7 +10,7 @@ The active canonical LoopDeck product continues in the separate `stupidsavacan/L
 
 ## Last verified hello-world reconstruction
 
-Before the remaining runtime route was sealed, the forward-migrated LoopDeck client was verified at head:
+Before the remaining runtime route was retired, the forward-migrated LoopDeck client was verified at head:
 
 `9912e4438e4f03f49474259404bd49779784f2d8`
 

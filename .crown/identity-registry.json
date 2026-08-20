@@ -1,0 +1,14 @@
+{
+  "destroyer": {
+    "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEA5utKNEg28aPTK24wDAwoYTSPWlFGXrXzaWx3Vf9Au2Y=",
+    "identityPublicKeySha256": "e17de86f1d2cb20cbeceab56eebfedab3e62535a680f440d47bb9f85bc0df90f"
+  },
+  "majan": {
+    "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEAh2vOQ7MuC5Qui+0fAQLRGDreouQMClW38sVVT4DWsJ4=",
+    "identityPublicKeySha256": "06f7b584dcf982e0e3ffb0c6b0c8796506d040156177a950cb06ec490dec0157"
+  },
+  "loopdeck": {
+    "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEAParl1w7PBt76i6vt0BqkvJUjSZIPyoPuCJxEwxdgnoM=",
+    "identityPublicKeySha256": "c663b4d98cf151bbc735fa1e20ecae65000f495c954ade5a6a37bd096fbf0b3f"
+  }
+}

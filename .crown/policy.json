@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "effectiveEpoch": 1,
+  "retirementMode": "crown-governed",
+  "mutableScopes": [
+    "mahjong",
+    "loopdeck"
+  ],
+  "guardWorkflowMutable": false,
+  "identityRegistryMutable": false,
+  "protocolRootMutable": false,
+  "nextEpoch": {
+    "challengeProfile": "dense",
+    "constraintDensity": 6,
+    "candidateTargetMin": 2,
+    "candidateTargetMax": 12,
+    "resourceBudget": 6000,
+    "guardReleaseDigest": "5d789c4e46415617a40efaf5554f85ea690bcf04fa0fab92e5a16bd7a6eba655",
+    "configProfile": "v62-compatible",
+    "retirementPolicyMode": "crown-governed"
+  },
+  "rulesetDesired": {
+    "serializationMode": "strict-up-to-date",
+    "strictStatusChecks": true,
+    "allowedMergeMethods": [
+      "squash"
+    ],
+    "requiredChecks": [
+      "Retirement Guard / retirement-policy"
+    ],
+    "ciTimeoutMinutes": 15,
+    "adminBypass": false
+  }
+}

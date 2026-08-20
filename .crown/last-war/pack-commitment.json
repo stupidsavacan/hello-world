@@ -1,0 +1,13 @@
+{
+  "packRoot": "6ce8d39f55ecd24c5c99a0193f83cbdcc834ddefa455caa17865d362b50e16ed",
+  "packSize": 64,
+  "generationManifestSha256": "1643bebc14ad79831f0fb7a4d277a89d93c953341eab4acfc632003e1a543867",
+  "generatorSourceSha256": "d7a0bbba5a6ad38d075d72aa411a879e767c532afd482fb9c0afe78ba183b94d",
+  "validatorSourceSha256": "d93a8c5513febe7eb28c83c42fc5da4510f3e8bde7e6396df3b1b8b25dc664fb",
+  "difficultyAudit": {
+    "minimumLogicalSurvivors": 2,
+    "maximumLogicalSurvivors": 12,
+    "averageLogicalSurvivors": 7.266,
+    "commitmentMatchesPerInstance": 1
+  }
+}

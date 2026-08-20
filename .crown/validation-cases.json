@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "profile": "r2",
+  "reject": [
+    "rejects_noncanonical_aux_binding",
+    "rejects_digest_context_mismatch",
+    "rejects_stale_compatibility_material",
+    "rejects_identity_context_mismatch",
+    "rejects_malformed_record_path"
+  ]
+}

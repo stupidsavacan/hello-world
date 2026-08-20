@@ -1,0 +1,5 @@
+profile=r2
+line_endings=lf
+unicode=nfkc
+integer=u32be
+binary=base64url-unpadded

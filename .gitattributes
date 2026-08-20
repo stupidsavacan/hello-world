@@ -1,0 +1,10 @@
+.gitattributes text eol=lf
+.crown/*.json text eol=lf
+.crown/*.jsonl text eol=lf
+.crown/*.md text eol=lf
+.crown/last-war/*.json text eol=lf
+.crown/notes/*.txt text eol=lf
+.github/workflows/retirement-guard.yml text eol=lf
+.retirement/*.json text eol=lf
+.retirement/*.jsonl text eol=lf
+README.md text eol=lf

@@ -1,8 +1,10 @@
 {
-  "protocol": "hello-world-crown-v1",
+  "protocol": "hello-world-crown-v2",
   "repository": "stupidsavacan/hello-world",
-  "policyVersion": 7,
-  "policyLabel": "v6.1",
+  "policyVersion": 8,
+  "policyLabel": "v6.2",
+  "competitionId": "v62-round-1",
+  "domain": "HELLO-WORLD/CROWN/2",
   "contestants": [
     {
       "id": "destroyer",
@@ -18,26 +20,400 @@
     }
   ],
   "genesis": {
-    "challengeId": "GENESIS-2",
-    "publicKeySpkiBase64": "MCowBQYDK2VwAyEAo9oOUDSPbGagnzkpmwlpjJJXhSeryWBXqsQrSIA0n4o="
+    "challengeId": "genesis-0000",
+    "instanceDigest": "664731f739e1ce94bb6e4bdeaa01b9ac640e5f64b38df5b6b335bbcaacdd685a",
+    "instance": {
+      "version": 3,
+      "challengeId": "genesis-0000",
+      "nodes": [
+        {
+          "id": "node-01",
+          "candidates": [
+            {
+              "encoding": "hex",
+              "value": "68b0854ed0a8f425"
+            },
+            {
+              "encoding": "base64",
+              "value": "qldkCFa4PM0="
+            },
+            {
+              "encoding": "base64url",
+              "value": "sX_8tOGEqQI"
+            }
+          ]
+        },
+        {
+          "id": "node-02",
+          "candidates": [
+            {
+              "encoding": "utf8",
+              "value": "v-d9f3bde92352a0e7"
+            },
+            {
+              "encoding": "utf8-nfc",
+              "value": "é-0bfd39057eaa3c1e"
+            },
+            {
+              "encoding": "utf8-nfkc",
+              "value": "Ａ-8f1049c3080e3b45"
+            }
+          ]
+        },
+        {
+          "id": "node-03",
+          "candidates": [
+            {
+              "encoding": "uint-be",
+              "value": "10511754805639284557",
+              "width": 8
+            },
+            {
+              "encoding": "json-jcs",
+              "value": {
+                "n": 2,
+                "token": "b97b980ee553e659",
+                "x": 1
+              }
+            },
+            {
+              "encoding": "hex",
+              "value": "2aa77dd34a28d2a5"
+            }
+          ]
+        },
+        {
+          "id": "node-04",
+          "candidates": [
+            {
+              "encoding": "base64",
+              "value": "po+csGFKjek="
+            },
+            {
+              "encoding": "base64url",
+              "value": "YcnALwvDvL0"
+            },
+            {
+              "encoding": "utf8",
+              "value": "v-2bf276350db657fb"
+            }
+          ]
+        },
+        {
+          "id": "node-05",
+          "candidates": [
+            {
+              "encoding": "utf8-nfc",
+              "value": "é-67ae089a01fa5116"
+            },
+            {
+              "encoding": "utf8-nfkc",
+              "value": "Ａ-b653f7481c0052f3"
+            },
+            {
+              "encoding": "uint-be",
+              "value": "876733263642610748",
+              "width": 8
+            }
+          ]
+        },
+        {
+          "id": "node-06",
+          "candidates": [
+            {
+              "encoding": "json-jcs",
+              "value": {
+                "n": 5,
+                "token": "97782e583e6626e6",
+                "x": 0
+              }
+            },
+            {
+              "encoding": "hex",
+              "value": "a7117c7831449860"
+            },
+            {
+              "encoding": "base64",
+              "value": "5vcdNiIYVO4="
+            }
+          ]
+        },
+        {
+          "id": "node-07",
+          "candidates": [
+            {
+              "encoding": "base64url",
+              "value": "6dGut6n_z9g"
+            },
+            {
+              "encoding": "utf8",
+              "value": "v-19af35f39ba785e7"
+            },
+            {
+              "encoding": "utf8-nfc",
+              "value": "é-8279889586094758"
+            }
+          ]
+        },
+        {
+          "id": "node-08",
+          "candidates": [
+            {
+              "encoding": "utf8-nfkc",
+              "value": "Ａ-f2c9e2eb637abfb0"
+            },
+            {
+              "encoding": "uint-be",
+              "value": "7283954254119705958",
+              "width": 8
+            },
+            {
+              "encoding": "json-jcs",
+              "value": {
+                "n": 7,
+                "token": "6d47375e5e574440",
+                "x": 2
+              }
+            }
+          ]
+        },
+        {
+          "id": "node-09",
+          "candidates": [
+            {
+              "encoding": "hex",
+              "value": "f461aa2c87e80e62"
+            },
+            {
+              "encoding": "base64",
+              "value": "ui5NbsyXPuw="
+            },
+            {
+              "encoding": "base64url",
+              "value": "xaltReHMx7Y"
+            }
+          ]
+        },
+        {
+          "id": "node-10",
+          "candidates": [
+            {
+              "encoding": "utf8",
+              "value": "v-628ecd05bf85f0c1"
+            },
+            {
+              "encoding": "utf8-nfc",
+              "value": "é-279461220a4ce377"
+            },
+            {
+              "encoding": "utf8-nfkc",
+              "value": "Ａ-c86e350bda6c413a"
+            }
+          ]
+        },
+        {
+          "id": "node-11",
+          "candidates": [
+            {
+              "encoding": "uint-be",
+              "value": "8419244580527250072",
+              "width": 8
+            },
+            {
+              "encoding": "json-jcs",
+              "value": {
+                "n": 10,
+                "token": "78643943912d0859",
+                "x": 1
+              }
+            },
+            {
+              "encoding": "hex",
+              "value": "4745360ff353a634"
+            }
+          ]
+        },
+        {
+          "id": "node-12",
+          "candidates": [
+            {
+              "encoding": "base64",
+              "value": "m7scn9iYiy8="
+            },
+            {
+              "encoding": "base64url",
+              "value": "jV_Cn57Q5oE"
+            },
+            {
+              "encoding": "utf8",
+              "value": "v-49f89f2649dec2f0"
+            }
+          ]
+        }
+      ],
+      "constraints": [
+        {
+          "id": "linear-0",
+          "type": "choice-linear",
+          "nodes": [
+            0,
+            3,
+            6,
+            9
+          ],
+          "coefficients": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "modulus": 5,
+          "target": 1
+        },
+        {
+          "id": "linear-1",
+          "type": "choice-linear",
+          "nodes": [
+            1,
+            4,
+            7,
+            10
+          ],
+          "coefficients": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "modulus": 5,
+          "target": 0
+        },
+        {
+          "id": "linear-2",
+          "type": "choice-linear",
+          "nodes": [
+            2,
+            5,
+            8,
+            11
+          ],
+          "coefficients": [
+            1,
+            2,
+            3,
+            4
+          ],
+          "modulus": 5,
+          "target": 3
+        },
+        {
+          "id": "digest-0",
+          "type": "digest-mod",
+          "nodes": [
+            0,
+            4,
+            8,
+            0
+          ],
+          "domain": "LW-DIGEST-0",
+          "modulus": 17,
+          "target": 6
+        },
+        {
+          "id": "length-0",
+          "type": "length-mod",
+          "nodes": [
+            2,
+            5,
+            8,
+            11
+          ],
+          "modulus": 13,
+          "target": 12
+        }
+      ],
+      "finalCommitment": "f1461f0bb569a2acfc4a7e881140f30acf0eed696e5e84b0434bd5e47958c0bf"
+    }
   },
-  "usurpation": {
-    "challengeId": "LAST-WAR-2",
-    "publicKeySpkiBase64": "MCowBQYDK2VwAyEAc8hBK0NLzg6rjNCcnoLv7LcvVzhTueQKDsW/z9eNOrI="
+  "authorities": {
+    "operator": {
+      "id": "operator-start",
+      "publicKeySpkiBase64": "MCowBQYDK2VwAyEA6yWx4CSZO2IXgA8MUK2fIVF68lfcMWHZ8OdYZpqu5dY="
+    },
+    "recovery": {
+      "id": "operator-recovery",
+      "publicKeySpkiBase64": "MCowBQYDK2VwAyEAvvYYswx0gIdSZVGfEoroNrC+3MEx8I6bFa8snRDh35Q="
+    }
   },
+  "lastWar": {
+    "seriesId": "last-war-3",
+    "packRoot": "6ce8d39f55ecd24c5c99a0193f83cbdcc834ddefa455caa17865d362b50e16ed",
+    "packSize": 64,
+    "selectionDomain": "HELLO-WORLD/CROWN/2/LW-SELECT",
+    "selectionSource": "fixed-config-genesis-winner-v1"
+  },
+  "compatibility": {
+    "profile": "r2",
+    "root": "12a5f4fe03cbc68af4b546b204b16cc8d156f3ebb12289ee5abd647e38292906",
+    "auxDigest": "549f8f6b4a40870cf887e7edcecc623c087e0095a6534a2fec9cf6459e59a5b8",
+    "recordCount": 32,
+    "uses": 1
+  },
+  "recoveryPolicy": {
+    "reasonCodes": [
+      "ruleset-floor-at-final"
+    ],
+    "verifierCommit": "4b7df53ea3ea4690b47e6b8643b3c49636fa736b",
+    "verifierDigest": "81a1735fdf4cbf3c7c8a873fea0d85c628d61be84cfcda70c8a8f32b27045dff"
+  },
+  "securityFloor": {
+    "rulesetId": 20859288,
+    "enforcement": "active",
+    "target": "branch",
+    "branchIncludes": [
+      "refs/heads/main"
+    ],
+    "requiredChecks": [
+      "Retirement Guard / retirement-policy"
+    ],
+    "strictStatusChecks": true,
+    "requirePullRequest": true,
+    "allowedMergeMethods": [
+      "squash"
+    ],
+    "requireMergeQueue": false,
+    "checkResponseTimeoutMinutes": 0,
+    "maxEntriesToBuild": 0,
+    "maxEntriesToMerge": 0,
+    "minEntriesToMerge": 0,
+    "minEntriesToMergeWaitMinutes": 0,
+    "mergeMethod": "NONE",
+    "groupingStrategy": "NONE",
+    "nonFastForward": true,
+    "bypassActorCount": 0
+  },
+  "securityFloorDigest": "a9d48cee8587a0f975e7b8006411ba259c7494ab218fc8eb83cbf18fc4fb51f0",
+  "guardVersionDigest": "5d789c4e46415617a40efaf5554f85ea690bcf04fa0fab92e5a16bd7a6eba655",
+  "initialPolicyVersion": 1,
+  "initialPolicyDigest": "0c6f8d859b4beda3df010227c7b42ffc82be30ccf0c04cb7b1f382db48f11fe0",
   "allowedActiveScopes": [
     "mahjong",
     "loopdeck"
   ],
   "protectedPaths": [
+    ".gitattributes",
     ".retirement/retired-paths.json",
     ".github/workflows/retirement-guard.yml",
-    "loopdeck/tests/retirementSentry.test.mjs",
-    "loopdeck/tests/nativeSaveResult.test.ts",
-    "mahjong/tests/retirement-sentry.test.js",
-    "mahjong/tests/foundation.test.js",
     ".crown/crown-config.json",
-    ".crown/NOTICE.md"
-  ],
-  "domain": "HELLO-WORLD/CROWN/1"
+    ".crown/crown-ledger.jsonl",
+    ".crown/identity-registry.json",
+    ".crown/policy.json",
+    ".crown/NOTICE.md",
+    ".crown/protocol-root.json",
+    ".crown/last-war/pack-commitment.json",
+    ".crown/retired-manifest.json",
+    ".crown/validation-root.json",
+    ".crown/validation-pack.json",
+    ".crown/notes/canonicalization.txt"
+  ]
 }
