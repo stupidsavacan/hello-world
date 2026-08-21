@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>オフライン三麻</title>
+</head>
+<body>
+<div class="app-shell">
+<header class="topbar"><div><h1>オフライン三麻</h1><p id="statusLine">起動中…</p></div><nav><button id="newGameButton">新しい対局</button><button id="settingsButton">設定</button><button id="recordsButton">牌譜・成績</button><button id="replayButton">牌譜リプレイ</button><button id="debugButton">デバッグ</button></nav></header>
+<main><section id="tableRoot" class="table" aria-label="麻雀卓"></section><section id="actionRoot" class="actions" aria-live="polite"></section><section id="logRoot" class="logs"></section></main>
+</div>
+<dialog id="settingsDialog"><div class="dialog-card"><header><h2>ルール設定</h2><button data-close="settingsDialog">×</button></header><div id="settingsRoot" class="settings-grid"></div><section id="settingsTransferRoot" class="settings-transfer"></section><footer><button id="saveSettingsButton">保存して新しい対局</button></footer></div></dialog>
+<dialog id="recordsDialog"><div class="dialog-card wide"><header><h2>牌譜・履歴・成績</h2><button data-close="recordsDialog">×</button></header><div id="recordsRoot"></div></div></dialog>
+<dialog id="replayDialog"><div class="dialog-card wide"><header><h2>牌譜リプレイ</h2><button id="closeReplayButton">×</button></header><div class="replay-picker"><label>牌譜 <select id="replayRecordSelect"></select></label></div><div id="replayRoot"></div></div></dialog>
+<dialog id="debugDialog"><div class="dialog-card wide"><header><h2>デバッグ</h2><button data-close="debugDialog">×</button></header><label>固定 seed <input id="seedInput" maxlength="128"></label><div class="row"><button id="applySeedButton">seedで新しい対局</button><button id="resetStorageButton" class="danger">保存データを全削除</button></div><pre id="debugRoot"></pre></div></dialog>
+<script>
+(function packagedBootstrap() {
+  const base = "play-payload/";
+  const css = ["css-01.asset","css-02.asset","css-03.asset","css-04.asset","css-05.asset"];
+  const js = Array.from({ length: 54 }, (_, index) => `js-${String(index + 1).padStart(2, "0")}.asset`);
+
+  function readText(path) {
+    return fetch(path, { cache: "no-store" }).then((response) => {
+      if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
+      return response.text();
+    }).catch((fetchError) => new Promise((resolve, reject) => {
+      try {
+        const xhr = new XMLHttpRequest();
+        xhr.open("GET", path, true);
+        xhr.onload = () => {
+          if ((xhr.status >= 200 && xhr.status < 300) || (location.protocol === "file:" && xhr.status === 0)) {
+            resolve(xhr.responseText);
+          } else {
+            reject(fetchError);
+          }
+        };
+        xhr.onerror = () => reject(fetchError);
+        xhr.send();
+      } catch (_) {
+        reject(fetchError);
+      }
+    }));
+  }
+
+  async function start() {
+    for (const name of css) {
+      const style = document.createElement("style");
+      style.dataset.packagedFrom = name;
+      style.textContent = await readText(base + name);
+      document.head.appendChild(style);
+    }
+    for (const name of js) {
+      const source = await readText(base + name);
+      (0, eval)(`${source}\n//# sourceURL=${base + name}`);
+    }
+  }
+
+  start().catch((error) => {
+    console.error("Packaged Mahjong startup failed", error);
+    const status = document.getElementById("statusLine");
+    if (status) status.textContent = `起動失敗: ${error && error.message ? error.message : String(error)}`;
+  });
+})();
+</script>
+</body>
+</html>
