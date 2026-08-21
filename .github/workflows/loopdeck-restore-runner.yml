@@ -1,0 +1,28 @@
+name: Run LoopDeck restore bootstrap
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    if: github.head_ref == 'loopdeck-ii/v62-r2-complete-zip-restore'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: loopdeck-ii/v62-r2-complete-zip-restore
+          fetch-depth: 0
+      - name: Execute and retire branch-only bootstrap
+        shell: bash
+        run: |
+          set -euo pipefail
+          sed -n '/^        run: |$/,$p' .github/workflows/loopdeck-full-restore-bootstrap.yml \
+            | tail -n +2 \
+            | sed 's/^          //' > /tmp/loopdeck-restore.sh
+          sed -i 's#rm -f .github/workflows/loopdeck-full-restore-bootstrap.yml#rm -f .github/workflows/loopdeck-full-restore-bootstrap.yml .github/workflows/loopdeck-restore-runner.yml#' /tmp/loopdeck-restore.sh
+          bash /tmp/loopdeck-restore.sh
