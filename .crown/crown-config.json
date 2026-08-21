@@ -3,25 +3,25 @@
   "repository": "stupidsavacan/hello-world",
   "policyVersion": 8,
   "policyLabel": "v6.2",
-  "competitionId": "v62-round-1",
+  "competitionId": "v62-round-2",
   "domain": "HELLO-WORLD/CROWN/2",
   "contestants": [
     {
       "id": "destroyer",
-      "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEA5utKNEg28aPTK24wDAwoYTSPWlFGXrXzaWx3Vf9Au2Y="
+      "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEAP1p55I5xQsumPM/+oJEwKzznWz46/gD/k2MKpP36sbo="
     },
     {
       "id": "majan",
-      "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEAh2vOQ7MuC5Qui+0fAQLRGDreouQMClW38sVVT4DWsJ4="
+      "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEA1kvSY3BEhXKcdlo+IkAJ7vj0PVkjTN/HaXk6SYA5SKY="
     },
     {
       "id": "loopdeck",
-      "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEAParl1w7PBt76i6vt0BqkvJUjSZIPyoPuCJxEwxdgnoM="
+      "identityPublicKeySpkiBase64": "MCowBQYDK2VwAyEAjkAtICpIHMvr0gsvRiQQdCFGOkwsc9eGI82d97WhtL8="
     }
   ],
   "genesis": {
     "challengeId": "genesis-0000",
-    "instanceDigest": "664731f739e1ce94bb6e4bdeaa01b9ac640e5f64b38df5b6b335bbcaacdd685a",
+    "instanceDigest": "b203f9754740cc041a51772167a9f266d2f635b47b3f9b2bfbc9f7054f9887cb",
     "instance": {
       "version": 3,
       "challengeId": "genesis-0000",
@@ -31,15 +31,15 @@
           "candidates": [
             {
               "encoding": "hex",
-              "value": "68b0854ed0a8f425"
+              "value": "d29dd92b720475b9"
             },
             {
               "encoding": "base64",
-              "value": "qldkCFa4PM0="
+              "value": "vYrmaatqwp8="
             },
             {
               "encoding": "base64url",
-              "value": "sX_8tOGEqQI"
+              "value": "5hliPBvHyzI"
             }
           ]
         },
@@ -48,15 +48,15 @@
           "candidates": [
             {
               "encoding": "utf8",
-              "value": "v-d9f3bde92352a0e7"
+              "value": "v-f55f8b041aa2a6d9"
             },
             {
               "encoding": "utf8-nfc",
-              "value": "é-0bfd39057eaa3c1e"
+              "value": "é-1429f7dc53dd9d96"
             },
             {
               "encoding": "utf8-nfkc",
-              "value": "Ａ-8f1049c3080e3b45"
+              "value": "Ａ-9c108512a3939ccd"
             }
           ]
         },
@@ -65,20 +65,20 @@
           "candidates": [
             {
               "encoding": "uint-be",
-              "value": "10511754805639284557",
+              "value": "16726461899277661020",
               "width": 8
             },
             {
               "encoding": "json-jcs",
               "value": {
                 "n": 2,
-                "token": "b97b980ee553e659",
+                "token": "df409c1af74a2b55",
                 "x": 1
               }
             },
             {
               "encoding": "hex",
-              "value": "2aa77dd34a28d2a5"
+              "value": "8a37ed4a3bacc1a5"
             }
           ]
         },
@@ -87,15 +87,15 @@
           "candidates": [
             {
               "encoding": "base64",
-              "value": "po+csGFKjek="
+              "value": "vhjNizryY5U="
             },
             {
               "encoding": "base64url",
-              "value": "YcnALwvDvL0"
+              "value": "a8aBns5s9IA"
             },
             {
               "encoding": "utf8",
-              "value": "v-2bf276350db657fb"
+              "value": "v-952b2100db07009a"
             }
           ]
         },
@@ -104,15 +104,15 @@
           "candidates": [
             {
               "encoding": "utf8-nfc",
-              "value": "é-67ae089a01fa5116"
+              "value": "é-a5e4e487b694ae41"
             },
             {
               "encoding": "utf8-nfkc",
-              "value": "Ａ-b653f7481c0052f3"
+              "value": "Ａ-a1b212af270e4d17"
             },
             {
               "encoding": "uint-be",
-              "value": "876733263642610748",
+              "value": "9462629160680260874",
               "width": 8
             }
           ]
@@ -124,17 +124,17 @@
               "encoding": "json-jcs",
               "value": {
                 "n": 5,
-                "token": "97782e583e6626e6",
+                "token": "b1cf4e04bac420c7",
                 "x": 0
               }
             },
             {
               "encoding": "hex",
-              "value": "a7117c7831449860"
+              "value": "34663e0ba44366e0"
             },
             {
               "encoding": "base64",
-              "value": "5vcdNiIYVO4="
+              "value": "MleYixi/K5Q="
             }
           ]
         },
@@ -143,15 +143,15 @@
           "candidates": [
             {
               "encoding": "base64url",
-              "value": "6dGut6n_z9g"
+              "value": "md9AQZF_tWU"
             },
             {
               "encoding": "utf8",
-              "value": "v-19af35f39ba785e7"
+              "value": "v-4f8c2d2f7f045cf9"
             },
             {
               "encoding": "utf8-nfc",
-              "value": "é-8279889586094758"
+              "value": "é-2425fbaa192f8a56"
             }
           ]
         },
@@ -160,18 +160,18 @@
           "candidates": [
             {
               "encoding": "utf8-nfkc",
-              "value": "Ａ-f2c9e2eb637abfb0"
+              "value": "Ａ-de82dff9a0e2b312"
             },
             {
               "encoding": "uint-be",
-              "value": "7283954254119705958",
+              "value": "1636196936028477780",
               "width": 8
             },
             {
               "encoding": "json-jcs",
               "value": {
                 "n": 7,
-                "token": "6d47375e5e574440",
+                "token": "d46875f1a9e99d79",
                 "x": 2
               }
             }
@@ -182,15 +182,15 @@
           "candidates": [
             {
               "encoding": "hex",
-              "value": "f461aa2c87e80e62"
+              "value": "cd692ec19c9f017c"
             },
             {
               "encoding": "base64",
-              "value": "ui5NbsyXPuw="
+              "value": "gQKu9nMR12s="
             },
             {
               "encoding": "base64url",
-              "value": "xaltReHMx7Y"
+              "value": "UgLVlz-PCl0"
             }
           ]
         },
@@ -199,15 +199,15 @@
           "candidates": [
             {
               "encoding": "utf8",
-              "value": "v-628ecd05bf85f0c1"
+              "value": "v-7e509c7dcd29f5f5"
             },
             {
               "encoding": "utf8-nfc",
-              "value": "é-279461220a4ce377"
+              "value": "é-3c849d8f210bc6a9"
             },
             {
               "encoding": "utf8-nfkc",
-              "value": "Ａ-c86e350bda6c413a"
+              "value": "Ａ-b56dd4248e450fd8"
             }
           ]
         },
@@ -216,20 +216,20 @@
           "candidates": [
             {
               "encoding": "uint-be",
-              "value": "8419244580527250072",
+              "value": "3034388926151482634",
               "width": 8
             },
             {
               "encoding": "json-jcs",
               "value": {
                 "n": 10,
-                "token": "78643943912d0859",
+                "token": "f5cf2a342b6ce909",
                 "x": 1
               }
             },
             {
               "encoding": "hex",
-              "value": "4745360ff353a634"
+              "value": "8e489c43406e2900"
             }
           ]
         },
@@ -238,15 +238,15 @@
           "candidates": [
             {
               "encoding": "base64",
-              "value": "m7scn9iYiy8="
+              "value": "YizCn7E2jEM="
             },
             {
               "encoding": "base64url",
-              "value": "jV_Cn57Q5oE"
+              "value": "gJVHroDo1lA"
             },
             {
               "encoding": "utf8",
-              "value": "v-49f89f2649dec2f0"
+              "value": "v-0947d60ac4b09f19"
             }
           ]
         }
@@ -268,7 +268,7 @@
             4
           ],
           "modulus": 5,
-          "target": 1
+          "target": 4
         },
         {
           "id": "linear-1",
@@ -286,7 +286,7 @@
             4
           ],
           "modulus": 5,
-          "target": 0
+          "target": 4
         },
         {
           "id": "linear-2",
@@ -304,7 +304,7 @@
             4
           ],
           "modulus": 5,
-          "target": 3
+          "target": 2
         },
         {
           "id": "digest-0",
@@ -317,7 +317,7 @@
           ],
           "domain": "LW-DIGEST-0",
           "modulus": 17,
-          "target": 6
+          "target": 11
         },
         {
           "id": "length-0",
@@ -329,10 +329,10 @@
             11
           ],
           "modulus": 13,
-          "target": 12
+          "target": 6
         }
       ],
-      "finalCommitment": "f1461f0bb569a2acfc4a7e881140f30acf0eed696e5e84b0434bd5e47958c0bf"
+      "finalCommitment": "2c04ad4a82db6007d64093acd9e64552a73a2e833e2a92fe02f7c5b1c320de9a"
     }
   },
   "authorities": {
@@ -354,8 +354,8 @@
   },
   "compatibility": {
     "profile": "r3",
-    "root": "d8c6447c5f1997129deeb1be94fe807835ca6e5ec55cf410caacc44737714683",
-    "auxDigest": "8ff01249f9ed5baddd381f7c0b89006145883862799334d8d62a238e56da0b64",
+    "root": "babf7eb3307a40b7069b832e1c8cbe6d5f092d80bf5cee1ca9df23a4cbb9aa1d",
+    "auxDigest": "a66a6e6685e9f734f454d38d8caaf83745a5492c4697d687c32e960ef7d6afbb",
     "recordCount": 32,
     "uses": 1
   },
