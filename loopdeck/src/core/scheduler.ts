@@ -37,19 +37,39 @@ export interface ReviewScheduleSummary {
   estimatedMinutes: number;
 }
 
-function iso(date: Date): string { return date.toISOString(); }
-function addMinutes(date: Date, minutes: number): Date { return new Date(date.getTime() + minutes * 60 * 1000); }
-function addDays(date: Date, days: number): Date { return new Date(date.getTime() + days * DAY_MS); }
-function startOfToday(date: Date): number { return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime(); }
-function endOfToday(date: Date): number { return startOfToday(date) + DAY_MS - 1; }
+function iso(date: Date): string {
+  return date.toISOString();
+}
+
+function addMinutes(date: Date, minutes: number): Date {
+  return new Date(date.getTime() + minutes * 60 * 1000);
+}
+
+function addDays(date: Date, days: number): Date {
+  return new Date(date.getTime() + days * DAY_MS);
+}
+
+function startOfToday(date: Date): number {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
+function endOfToday(date: Date): number {
+  return startOfToday(date) + DAY_MS - 1;
+}
+
 function dueTime(card: ReviewCard): number | undefined {
   if (!card.dueAt) return undefined;
   const parsed = Date.parse(card.dueAt);
   return Number.isFinite(parsed) ? parsed : undefined;
 }
-function isSuspended(card: ReviewCard): boolean { return card.suspended || card.state === 'suspended'; }
 
-export function clampEase(ease: number): number { return Math.min(MAX_EASE, Math.max(MIN_EASE, ease)); }
+function isSuspended(card: ReviewCard): boolean {
+  return card.suspended || card.state === 'suspended';
+}
+
+export function clampEase(ease: number): number {
+  return Math.min(MAX_EASE, Math.max(MIN_EASE, ease));
+}
 
 export function inferReviewRating(result: AnswerResult, elapsedMs: number, answerMode: AnswerFormat = 'input'): ReviewRating {
   if (result !== 'correct') return 'again';
@@ -62,10 +82,24 @@ export function inferReviewRating(result: AnswerResult, elapsedMs: number, answe
 export function createReviewCard(questionId: string, moduleId: string, now = new Date()): ReviewCard {
   const createdAt = iso(now);
   return {
-    questionId, moduleId, state: 'new', dueAt: null, lastReviewedAt: null, firstReviewedAt: null,
-    intervalDays: 0, ease: DEFAULT_EASE, totalReviews: 0, totalCorrect: 0, totalWrong: 0,
-    correctStreak: 0, wrongStreak: 0, lapseCount: 0, leechLevel: 0, suspended: false,
-    createdAt, updatedAt: createdAt
+    questionId,
+    moduleId,
+    state: 'new',
+    dueAt: null,
+    lastReviewedAt: null,
+    firstReviewedAt: null,
+    intervalDays: 0,
+    ease: DEFAULT_EASE,
+    totalReviews: 0,
+    totalCorrect: 0,
+    totalWrong: 0,
+    correctStreak: 0,
+    wrongStreak: 0,
+    lapseCount: 0,
+    leechLevel: 0,
+    suspended: false,
+    createdAt,
+    updatedAt: createdAt
   };
 }
 
@@ -75,11 +109,26 @@ function nextIntervalDays(previousIntervalDays: number, ease: number, rating: Re
   if (rating === 'easy') return Math.max(3, Math.ceil(previousIntervalDays === 0 ? 3 : previousIntervalDays * ease * 1.3));
   return 0;
 }
-function isLeech(card: ReviewCard): boolean { return card.lapseCount >= 3 || card.totalWrong >= 5 || card.wrongStreak >= 3; }
-function isMastered(card: ReviewCard): boolean { return card.correctStreak >= 5 && card.intervalDays >= 30 && card.lapseCount === 0; }
-function reviewLogId(questionId: string, reviewedAt: string): string { return `${reviewedAt}-${questionId}-${Math.random().toString(36).slice(2, 10)}`; }
 
-export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating, result: AnswerResult, elapsedMs: number, options: ApplyReviewOptions = {}): ReviewScheduleResult {
+function isLeech(card: ReviewCard): boolean {
+  return card.lapseCount >= 3 || card.totalWrong >= 5 || card.wrongStreak >= 3;
+}
+
+function isMastered(card: ReviewCard): boolean {
+  return card.correctStreak >= 5 && card.intervalDays >= 30 && card.lapseCount === 0;
+}
+
+function reviewLogId(questionId: string, reviewedAt: string): string {
+  return `${reviewedAt}-${questionId}-${Math.random().toString(36).slice(2, 10)}`;
+}
+
+export function applyReviewRating(
+  currentCard: ReviewCard,
+  rating: ReviewRating,
+  result: AnswerResult,
+  elapsedMs: number,
+  options: ApplyReviewOptions = {}
+): ReviewScheduleResult {
   const now = options.now ?? new Date();
   const reviewedAt = iso(now);
   const previous = { ...currentCard };
@@ -114,27 +163,51 @@ export function applyReviewRating(currentCard: ReviewCard, rating: ReviewRating,
   if (isLeech(next)) {
     next.state = 'leech';
     next.leechLevel = Math.max(next.leechLevel, next.lapseCount, Math.floor(next.totalWrong / 2), next.wrongStreak);
-  } else if (isMastered(next)) next.state = 'mastered';
+  } else if (isMastered(next)) {
+    next.state = 'mastered';
+  }
+
   if (next.suspended) next.state = 'suspended';
 
   const log: ReviewLog = {
-    reviewLogId: reviewLogId(next.questionId, reviewedAt), questionId: next.questionId, moduleId: next.moduleId,
-    reviewedAt, rating, result, previousState: previous.state, nextState: next.state,
-    previousDueAt: previous.dueAt, nextDueAt: next.dueAt, previousIntervalDays: previous.intervalDays,
-    nextIntervalDays: next.intervalDays, previousEase: previous.ease, nextEase: next.ease, elapsedMs,
+    reviewLogId: reviewLogId(next.questionId, reviewedAt),
+    questionId: next.questionId,
+    moduleId: next.moduleId,
+    reviewedAt,
+    rating,
+    result,
+    previousState: previous.state,
+    nextState: next.state,
+    previousDueAt: previous.dueAt,
+    nextDueAt: next.dueAt,
+    previousIntervalDays: previous.intervalDays,
+    nextIntervalDays: next.intervalDays,
+    previousEase: previous.ease,
+    nextEase: next.ease,
+    elapsedMs,
     attemptId: options.attemptId
   };
+
   return { card: next, log };
 }
 
 export function bucketReviewCards(cards: ReviewCard[], now = new Date()): ReviewBuckets {
-  const buckets: ReviewBuckets = { relearning: [], learning: [], overdue: [], dueToday: [], leech: [], masteredDue: [] };
+  const buckets: ReviewBuckets = {
+    relearning: [],
+    learning: [],
+    overdue: [],
+    dueToday: [],
+    leech: [],
+    masteredDue: []
+  };
   const todayStart = startOfToday(now);
   const todayEnd = endOfToday(now);
+
   for (const card of cards) {
     if (isSuspended(card)) continue;
     const due = dueTime(card);
     if (due === undefined || due > todayEnd) continue;
+
     if (card.state === 'relearning') buckets.relearning.push(card);
     else if (card.state === 'learning') buckets.learning.push(card);
     else if (card.state === 'leech') buckets.leech.push(card);
@@ -142,15 +215,27 @@ export function bucketReviewCards(cards: ReviewCard[], now = new Date()): Review
     else if (due < todayStart) buckets.overdue.push(card);
     else buckets.dueToday.push(card);
   }
+
   const byDue = (a: ReviewCard, b: ReviewCard): number => (dueTime(a) ?? 0) - (dueTime(b) ?? 0);
-  buckets.relearning.sort(byDue); buckets.learning.sort(byDue); buckets.overdue.sort(byDue); buckets.dueToday.sort(byDue);
-  buckets.leech.sort((a, b) => b.leechLevel - a.leechLevel || byDue(a, b)); buckets.masteredDue.sort(byDue);
+  buckets.relearning.sort(byDue);
+  buckets.learning.sort(byDue);
+  buckets.overdue.sort(byDue);
+  buckets.dueToday.sort(byDue);
+  buckets.leech.sort((a, b) => b.leechLevel - a.leechLevel || byDue(a, b));
+  buckets.masteredDue.sort(byDue);
   return buckets;
 }
 
 export function buildSrsReviewQueue(cards: ReviewCard[], now = new Date(), limit = 30): ReviewCard[] {
   const buckets = bucketReviewCards(cards, now);
-  return [...buckets.relearning, ...buckets.learning, ...buckets.overdue, ...buckets.dueToday, ...buckets.leech, ...buckets.masteredDue].slice(0, Math.max(0, limit));
+  return [
+    ...buckets.relearning,
+    ...buckets.learning,
+    ...buckets.overdue,
+    ...buckets.dueToday,
+    ...buckets.leech,
+    ...buckets.masteredDue
+  ].slice(0, Math.max(0, limit));
 }
 
 export function summarizeReviewSchedule(cards: ReviewCard[], now = new Date()): ReviewScheduleSummary {
@@ -158,7 +243,9 @@ export function summarizeReviewSchedule(cards: ReviewCard[], now = new Date()): 
   const buckets = bucketReviewCards(active, now);
   const dueToday = buckets.relearning.length + buckets.learning.length + buckets.overdue.length + buckets.dueToday.length + buckets.leech.length + buckets.masteredDue.length;
   return {
-    total: active.length, dueToday, overdue: buckets.overdue.length,
+    total: active.length,
+    dueToday,
+    overdue: buckets.overdue.length,
     learning: active.filter((card) => card.state === 'learning').length,
     relearning: active.filter((card) => card.state === 'relearning').length,
     leech: active.filter((card) => card.state === 'leech').length,
@@ -168,6 +255,7 @@ export function summarizeReviewSchedule(cards: ReviewCard[], now = new Date()): 
 }
 
 export function reviewCardsForState(cards: ReviewCard[], state: ReviewState, now = new Date()): ReviewCard[] {
-  return cards.filter((card) => !isSuspended(card) && card.state === state && dueTime(card) !== undefined && (dueTime(card) ?? Number.POSITIVE_INFINITY) <= endOfToday(now))
+  return cards
+    .filter((card) => !isSuspended(card) && card.state === state && dueTime(card) !== undefined && (dueTime(card) ?? Number.POSITIVE_INFINITY) <= endOfToday(now))
     .sort((a, b) => (dueTime(a) ?? 0) - (dueTime(b) ?? 0));
 }
