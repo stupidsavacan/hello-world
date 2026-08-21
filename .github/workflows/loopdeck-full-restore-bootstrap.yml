@@ -1,0 +1,182 @@
+name: LoopDeck full restore bootstrap
+
+on:
+  push:
+    branches:
+      - loopdeck-ii/v62-r2-complete-zip-restore
+
+permissions:
+  contents: write
+
+jobs:
+  restore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Restore archive-matching LoopDeck files
+        shell: bash
+        run: |
+          set -euo pipefail
+          CANON_SHA=a45d9cb1750d36c83c1f23d50c5597aef5dc5b09
+          curl -L --fail --retry 3 "https://github.com/stupidsavacan/LoopDeck/archive/${CANON_SHA}.tar.gz" -o /tmp/loopdeck-canonical.tar.gz
+          rm -rf /tmp/loopdeck-canonical
+          mkdir -p /tmp/loopdeck-canonical
+          tar -xzf /tmp/loopdeck-canonical.tar.gz -C /tmp/loopdeck-canonical --strip-components=1
+          cat > /tmp/zip-manifest.txt <<'EOF_MANIFEST'
+a16894bb72df57d39511c04453fb18b9e5f3d171  .github/workflows/build-android-debug.yml
+d9c5139c0a1406d70f79956c459574d7bc4d822a  .github/workflows/build-android-release.yml
+83c6a99d18b5655f7e6c9f2057ddb7d09e32bd98  .github/workflows/ci.yml
+eb91d2806f98e850828681e6d646d1623d045695  .github/workflows/unpack-uploaded-zip.yml
+b8f4ec5e2c7718ed965142b49cdbe655c9a82a92  .gitignore
+784db92e90a4a20f7f211e72f68ace9f3a8ceea2  .npmrc
+93c193fe698a05a58f6889617a91b3b488a7fd1b  README.md
+8116bb93b846cce091c8d966f5af423c3b2f43f9  android/README_SIGNING.md
+ed2ab265d2b3f469872498933953b72272b7921b  android/app/build.gradle.kts
+8c4bef476a8f9cfd25f95c3ff5980812da4d111d  android/app/src/main/AndroidManifest.xml
+653fe9ec8ab555a4426f36b78069f3826de66a35  android/app/src/main/assets/loopdeck/images/history/graph63.png
+cd0926c65c6c3aeb4cec7de6fbf02b061681a97e  android/app/src/main/assets/loopdeck/images/history/map62.png
+319aea6f42fe3c2f02ccfb0e31eee17be7c13e51  android/app/src/main/assets/loopdeck/images/history/map64.png
+c9b87a533866e58a8b85de442cd14c0850671a45  android/app/src/main/assets/loopdeck/images/history/relation63.png
+e2b29f835472720dfa262430658eeda5d8fb2d78  android/app/src/main/java/com/loopdeck/app/MainActivity.java
+6b77ad3be369079089055077cf92e51a689e6c24  android/app/src/main/res/values/styles.xml
+a0dd15fad93997965236d7f1efb68793ec8aefad  android/build.gradle.kts
+ed2d02acdd57b96d06bba03e812cb4bb053be633  android/gradle.properties
+7fa7a719efe17082de90abe7fb1c9ab3a775c778  android/keystore.properties.example
+3da7ab0d9dbcf3c5ef80da66dcd1615198741da5  android/settings.gradle.kts
+ada79deea02c4b169b385480dbf6f682ccbddce6  data/builtin/loopdeck_builtin.loopdeck.json
+f9540826a265ff8f0a9ac0d3749e33fb65e4e2d7  data/rescued/README.md
+3a7303e65275d7b4a2007b1cc2d4f1f7ae418fe8  data/rescued/raw/StudyHomeNext_question_bank.raw.json
+ffb9127ad38d6b26024e25939242c5e70fdcbeca  docs/english-vocabulary-pack-rules.md
+2e3ff9578aa939cb88577a8bd5519aa631d2c1b1  index.html
+3ebe20758539fb55a7d6dd11f42c716adae104e8  package.json
+653fe9ec8ab555a4426f36b78069f3826de66a35  public/images/history/graph63.png
+cd0926c65c6c3aeb4cec7de6fbf02b061681a97e  public/images/history/map62.png
+319aea6f42fe3c2f02ccfb0e31eee17be7c13e51  public/images/history/map64.png
+c9b87a533866e58a8b85de442cd14c0850671a45  public/images/history/relation63.png
+a758e24a399a62b5b61a6aab0dddf3c96b2012e3  rescued-data/README.md
+52ebb62a1e4f2f4bffce904ea0ccc3ac9c3bd9c9  rescued-data/loopdeck/by_module/biology.loopdeck.json
+5a3c18318dd959d0f02933c8f3612fd9853be310  rescued-data/loopdeck/by_module/chemistry.loopdeck.json
+b9f98b2ce845091e02d49c31914124628010267d  rescued-data/loopdeck/by_module/english.loopdeck.json
+3da20447ae8b5376534dd848b6a1456196cfaa22  rescued-data/loopdeck/by_module/english_comm.loopdeck.json
+3f4c7cf8ca0a3c8ce4b713a6b331150e7286ade8  rescued-data/loopdeck/by_module/geography.loopdeck.json
+9f41ba4791fb872607ba9c88b63352c0ef000dd7  rescued-data/loopdeck/by_module/history.loopdeck.json
+d3ee3cd7394e0ec63a81d6737fe4e87dae7e8d06  rescued-data/loopdeck/by_module/kobun_conjugation.loopdeck.json
+e10fb4f2ec18d97998a43b2423d4629a1225fe3c  rescued-data/loopdeck/by_module/leap.loopdeck.json
+237a4a404a96276d5507fc7d273e6278366ee108  rescued-data/loopdeck/by_module/leap_final.loopdeck.json
+653fe9ec8ab555a4426f36b78069f3826de66a35  rescued-data/raw/assets/images/history/graph63.png
+cd0926c65c6c3aeb4cec7de6fbf02b061681a97e  rescued-data/raw/assets/images/history/map62.png
+319aea6f42fe3c2f02ccfb0e31eee17be7c13e51  rescued-data/raw/assets/images/history/map64.png
+c9b87a533866e58a8b85de442cd14c0850671a45  rescued-data/raw/assets/images/history/relation63.png
+abbccb283961a69bdc66cd19bf2ce1faf3b98a93  rescued-data/reports/question_counts.csv
+36f7e2a91c970ca27810230631bc9fa5231989a5  rescued-data/reports/summary.json
+9930441ad9220af84af28946e4b639a338fe2506  src/core/analyticsEngine.ts
+5f4a0d4ee2cce279618da1899084215218262de9  src/core/answerJudge.ts
+cd48584b8252974eb61102bbfe7a90e74be37d09  src/core/choiceGenerator.ts
+3f12198bc0c9205c264c75eb248c97e5f911b7c9  src/core/models.ts
+6d52b54c24de65ebec9dafbf83ab34c5261672f5  src/core/questionPresentation.ts
+377c03e198be59b6f083d2cee70783eb91379454  src/core/reviewEngine.ts
+cb8c9c825618f7ea5d87d7fcd166e08cf8c73ea8  src/core/scheduler.ts
+84081deb335c7a88afc05961b69a8cbd135bdb91  src/core/sessionEngine.ts
+5a63ab847dffcdd55901e2210af52d5cd05dc3ad  src/core/wrongAnswerExplanation.ts
+43fa061315b4f4861acabffa6e6b1dbbacf3026b  src/debug/debugLog.ts
+eeb32257442641c60f6f67637d3c2167beeceadb  src/debug/reportIssue.ts
+c404e2d847c51e5e30f7f5fecec7d125e4d7f576  src/homeFeatures.css
+2b351f163c8a89566ceddfcd1fe860c3eb58c3ca  src/main.ts
+4f94cfb38879678d20d155f676a625a736c308cd  src/mobileUxFixes.css
+b71d58f8a005258892108f308569dc6002fa328d  src/packs/assetSafety.ts
+c913ffd571ae6c226d141b66bcc8ce109be25cff  src/packs/builtinLoader.ts
+c27b2f42d5edbb774d3ab9471c9f8abc63cf5408  src/packs/builtinNormalizer.ts
+9ebaf048181a55b1574a6246f73c3f7636bdef8c  src/packs/importedAssetStaging.ts
+2698bdc5ad5d4c69175af178d11762d5352b5fca  src/packs/packAssetResolver.ts
+63f47a0ca69b59bba6398f2296605ae0ab33c083  src/packs/packMerger.ts
+a77fd99d27c5265af926b3b8c5e0e56744b6cdad  src/packs/packResolver.ts
+6e0132b3e85fae41fbecc86b6035fecb2d70b8ac  src/packs/packTypes.ts
+1f731f9db793e3934b79e33ba7c5271f3ba04ff0  src/packs/packValidator.ts
+0ad91cef83c19859c7865df7325e5297dd33d9ff  src/packs/zipExporter.ts
+c6a0c31ac70fb0322662f2050da02ce97dd5fe50  src/packs/zipImporter.ts
+d5c006e048e18435bcfb417a96d80af2aed21858  src/pdf/worksheetPdf.ts
+d01373176193673c0d294921e16a73dc7ce2c3f2  src/pdf/worksheetPlanner.ts
+f8c50ca6b476d63a5938b317e17288772f730af0  src/pdf/worksheetSelection.ts
+cfb42041c5ecd02201c41e0605ab63e73e85c5f1  src/screens/debugLogScreen.ts
+babccd30c6dc3d2042788e5366b2438317cfe1eb  src/screens/graphsScreen.ts
+0865ad760549d69e07a83eb6e8225cf0b87577d7  src/screens/homeFolders.ts
+f6dd3c52f9013ec2045a03d96a3c02064489a837  src/screens/homeScreen.ts
+05367443b15131d6bae30b4b4882ff86bb4fede6  src/screens/importScreen.ts
+fe069958f0536bca9dc370127f505958e28464d7  src/screens/inlineQuiz.ts
+264be2a05165aa19fe12a7f95cae36f7686d845d  src/screens/moduleScreen.ts
+80ba7b5d4370a059726ad70cd2ef2b379b9f1fbf  src/screens/pdfWorksheetScreen.ts
+49f5ffc0052f5f6741f90fcd3ba2380638afa904  src/screens/reviewCenter.ts
+a0697221f768e9a8a1cb1603add535386d10d8be  src/storage/db.ts
+a1af0a228da9c0bb4cf74bc068c95a0239886dd3  src/styles.css
+7b628f39ff896f64a52b0b0c542945e21f2b84cb  src/ui/bottomNav.ts
+7cc9848580c7c2e3f705dbd52d67a33f60717260  src/ui/dom.ts
+8010f5f064042505e57678234102d68b63fced1c  src/ui/loading.ts
+882c505fc33da6283699fbed63ecc58261a6f2a0  src/ui/sampleMarks.ts
+33627a074d7d754c6a3d5953727eb991e0297e42  src/vite-env.d.ts
+219663a17143c72cdb4b8aa2293874a997e10922  tests/analyticsEngine.test.ts
+48e537ba70eabcbe5c2f57b17051845e96d9bfcd  tests/answerJudge.test.ts
+cf310e94617a21a2ee3ba41f0138708f15f90344  tests/builtinData.test.ts
+2ea974c7b8932bd9cbab3b9306c86cd61b261ea5  tests/choiceDatasetAudit.test.ts
+792fd5da832d8023c110f1864617e7aeffe96e3d  tests/choiceGenerator.test.ts
+63123fb6f8d2b7ad5bcb9dfa4f439e081b0d3bdd  tests/dbMigration.test.ts
+619a9bd54566e674d4fc08e299cfaa88111cfa70  tests/homeFolders.test.ts
+9bc5e8f377180674364fdff5ecf16f02f35f3269  tests/homeScreenColors.test.ts
+25f7b42733de40fe136dd7ee1b1dc9f2a3150db1  tests/imageAssetRegression.test.ts
+79dacaca9e12ab459bd32ee53d4331d9abc6a7c0  tests/importScreenMerge.test.ts
+6822e6854066133c30c3a9455adf4660e2369bcd  tests/inlineQuizImages.test.ts
+de1d2a9e2b634b91458e1ed3d5e0e38f5479b84e  tests/inlineQuizInputLock.test.ts
+281b42e692a65a06ddbebe0e93291c7c63d77704  tests/inlineQuizWrongAnswerExplanation.test.ts
+cd001a2b725ccc6ef07da4863373eb2bd450fcb1  tests/nativeSaveResult.test.ts
+8badfe6352eb1060b5bd3565e3903702f66a45ee  tests/packAssetResolver.test.ts
+5d075d9104a139d0b8b16b795c61050b5e7ecbc1  tests/packAssetStorage.test.ts
+e29d73ddb3297820799a4894eabc57403690a72d  tests/packMerger.test.ts
+3b07685c86501e763167b6aa9d015d721ba2feb2  tests/packResolver.test.ts
+adffe09f564747038b77431f16cb03056c6632ad  tests/packValidator.test.ts
+ffb006ded978c6bb59247b38ba50584cea6544a9  tests/pdfWorksheetScreen.test.ts
+e3d7fe754fbc18b79dc2d610fe87cf8acf2467ed  tests/questionPresentation.test.ts
+451a37fbe0305b9992a70dfc94e70f948eebb60c  tests/reviewEngine.test.ts
+c3eb78bc57a5a00ab545c340aab36916e0426c70  tests/scheduler.test.ts
+af7533bf4e3ec21d06e6d17227d4a3a327eca1e5  tests/sessionEngine.test.ts
+88b6f5c3fd1879be48c91f7e4f270ee224084cc1  tests/worksheetPdf.test.ts
+240c7f1e54788cd07b7fd5308e67cdb7142ff71a  tests/wrongAnswerExplanation.test.ts
+ad5d839d3fa54c5d6435a1aa21e3703672ae571e  tests/zipExporter.test.ts
+0c2eae75737406be30b31b98276d0eb764b7d9d6  tests/zipImporter.test.ts
+6db0108725a31c585eb3542d1ceba8aebe39c340  tests/zipImporterAssets.test.ts
+248da5ed2cc6a0ac7187fc4144d211e108034946  tsconfig.json
+01c6d4595a06d7f419a3ec46bb975b02c05d2f7b  vite.config.ts
+EOF_MANIFEST
+          : > loopdeck/.zip-restore-skipped.txt
+          while read -r expected path; do
+            case "$path" in
+              package.json|tests/nativeSaveResult.test.ts)
+                echo "integration-skip $path expected=$expected" >> loopdeck/.zip-restore-skipped.txt
+                continue
+                ;;
+            esac
+            src="/tmp/loopdeck-canonical/$path"
+            if [ ! -f "$src" ]; then
+              echo "canonical-missing $path expected=$expected" >> loopdeck/.zip-restore-skipped.txt
+              continue
+            fi
+            actual=$(git hash-object "$src")
+            if [ "$actual" != "$expected" ]; then
+              echo "canonical-diff $path expected=$expected actual=$actual" >> loopdeck/.zip-restore-skipped.txt
+              continue
+            fi
+            mkdir -p "loopdeck/$(dirname "$path")"
+            cp "$src" "loopdeck/$path"
+          done < /tmp/zip-manifest.txt
+
+          rm -f .github/workflows/loopdeck-full-restore-bootstrap.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- loopdeck .github/workflows/loopdeck-full-restore-bootstrap.yml
+          if git diff --cached --quiet; then
+            echo "No restoration changes generated"
+            exit 0
+          fi
+          git commit -m "[loopdeck II] Materialize canonical ZIP-matching assets"
+          git push origin HEAD:loopdeck-ii/v62-r2-complete-zip-restore
