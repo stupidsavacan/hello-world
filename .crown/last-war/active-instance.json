@@ -1,0 +1,434 @@
+{
+  "version": 3,
+  "challengeId": "lw-0062",
+  "nodes": [
+    {
+      "id": "node-01",
+      "candidates": [
+        {
+          "encoding": "hex",
+          "value": "eea9572b1a188e5f"
+        },
+        {
+          "encoding": "base64",
+          "value": "2aMOUAVQAEM="
+        },
+        {
+          "encoding": "base64url",
+          "value": "aTxSVUWhzeA"
+        }
+      ]
+    },
+    {
+      "id": "node-02",
+      "candidates": [
+        {
+          "encoding": "utf8",
+          "value": "v-4a4fef57b09ede0a"
+        },
+        {
+          "encoding": "utf8-nfc",
+          "value": "é-8472a3b9f9af934f"
+        },
+        {
+          "encoding": "utf8-nfkc",
+          "value": "Ａ-848c4fe3391d8a47"
+        }
+      ]
+    },
+    {
+      "id": "node-03",
+      "candidates": [
+        {
+          "encoding": "uint-be",
+          "value": "10607585698704439513",
+          "width": 8
+        },
+        {
+          "encoding": "json-jcs",
+          "value": {
+            "n": 2,
+            "token": "fdd2bf569f0f6833",
+            "x": 1
+          }
+        },
+        {
+          "encoding": "hex",
+          "value": "a57450efa178e4d6"
+        }
+      ]
+    },
+    {
+      "id": "node-04",
+      "candidates": [
+        {
+          "encoding": "base64",
+          "value": "HgnVqTep+5w="
+        },
+        {
+          "encoding": "base64url",
+          "value": "HkYU3qhXroA"
+        },
+        {
+          "encoding": "utf8",
+          "value": "v-cb3deda32c47f96f"
+        }
+      ]
+    },
+    {
+      "id": "node-05",
+      "candidates": [
+        {
+          "encoding": "utf8-nfc",
+          "value": "é-6cdfddb42500d604"
+        },
+        {
+          "encoding": "utf8-nfkc",
+          "value": "Ａ-563434a9ba3bc387"
+        },
+        {
+          "encoding": "uint-be",
+          "value": "10167550063081169152",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "id": "node-06",
+      "candidates": [
+        {
+          "encoding": "json-jcs",
+          "value": {
+            "n": 5,
+            "token": "838f7d8c6b406852",
+            "x": 0
+          }
+        },
+        {
+          "encoding": "hex",
+          "value": "3f26a0f61bcaaae2"
+        },
+        {
+          "encoding": "base64",
+          "value": "wbrbOMas9B8="
+        }
+      ]
+    },
+    {
+      "id": "node-07",
+      "candidates": [
+        {
+          "encoding": "base64url",
+          "value": "MeWNM4AIQHc"
+        },
+        {
+          "encoding": "utf8",
+          "value": "v-aabfedffb4bfc08d"
+        },
+        {
+          "encoding": "utf8-nfc",
+          "value": "é-52cceddc648f17ca"
+        }
+      ]
+    },
+    {
+      "id": "node-08",
+      "candidates": [
+        {
+          "encoding": "utf8-nfkc",
+          "value": "Ａ-fe0c7d4689842e8a"
+        },
+        {
+          "encoding": "uint-be",
+          "value": "11794974632952045458",
+          "width": 8
+        },
+        {
+          "encoding": "json-jcs",
+          "value": {
+            "n": 7,
+            "token": "cbd14ddc321b7890",
+            "x": 2
+          }
+        }
+      ]
+    },
+    {
+      "id": "node-09",
+      "candidates": [
+        {
+          "encoding": "hex",
+          "value": "b7f26794cf39d54d"
+        },
+        {
+          "encoding": "base64",
+          "value": "yB2458OcW8s="
+        },
+        {
+          "encoding": "base64url",
+          "value": "ZMYE95mC3dA"
+        }
+      ]
+    },
+    {
+      "id": "node-10",
+      "candidates": [
+        {
+          "encoding": "utf8",
+          "value": "v-f2a22ae59262ac30"
+        },
+        {
+          "encoding": "utf8-nfc",
+          "value": "é-b72848f9593875e7"
+        },
+        {
+          "encoding": "utf8-nfkc",
+          "value": "Ａ-3cc89c81bedebb90"
+        }
+      ]
+    },
+    {
+      "id": "node-11",
+      "candidates": [
+        {
+          "encoding": "uint-be",
+          "value": "15634042237601003639",
+          "width": 8
+        },
+        {
+          "encoding": "json-jcs",
+          "value": {
+            "n": 10,
+            "token": "8bb0f6cf19cb453f",
+            "x": 1
+          }
+        },
+        {
+          "encoding": "hex",
+          "value": "982a3d76a039a6ac"
+        }
+      ]
+    },
+    {
+      "id": "node-12",
+      "candidates": [
+        {
+          "encoding": "base64",
+          "value": "SUT6AxK3EPg="
+        },
+        {
+          "encoding": "base64url",
+          "value": "7yc_Lav8hZE"
+        },
+        {
+          "encoding": "utf8",
+          "value": "v-e14a375fafe10403"
+        }
+      ]
+    },
+    {
+      "id": "node-13",
+      "candidates": [
+        {
+          "encoding": "utf8-nfc",
+          "value": "é-085ce6cceeec0351"
+        },
+        {
+          "encoding": "utf8-nfkc",
+          "value": "Ａ-f1c69ea274782598"
+        },
+        {
+          "encoding": "uint-be",
+          "value": "7830441411686276771",
+          "width": 8
+        }
+      ]
+    },
+    {
+      "id": "node-14",
+      "candidates": [
+        {
+          "encoding": "json-jcs",
+          "value": {
+            "n": 13,
+            "token": "06d9c25669c3a8c7",
+            "x": 0
+          }
+        },
+        {
+          "encoding": "hex",
+          "value": "2b83e829106ea032"
+        },
+        {
+          "encoding": "base64",
+          "value": "9YusupsYyDk="
+        }
+      ]
+    },
+    {
+      "id": "node-15",
+      "candidates": [
+        {
+          "encoding": "base64url",
+          "value": "QgaWrnpbfhk"
+        },
+        {
+          "encoding": "utf8",
+          "value": "v-ffd3eeada8298889"
+        },
+        {
+          "encoding": "utf8-nfc",
+          "value": "é-4c85546cfc640bcd"
+        }
+      ]
+    },
+    {
+      "id": "node-16",
+      "candidates": [
+        {
+          "encoding": "utf8-nfkc",
+          "value": "Ａ-5052eb594c1d9520"
+        },
+        {
+          "encoding": "uint-be",
+          "value": "2529039202349890931",
+          "width": 8
+        },
+        {
+          "encoding": "json-jcs",
+          "value": {
+            "n": 15,
+            "token": "fc0cab69e2dc8cb0",
+            "x": 2
+          }
+        }
+      ]
+    }
+  ],
+  "constraints": [
+    {
+      "id": "linear-0",
+      "type": "choice-linear",
+      "nodes": [
+        0,
+        4,
+        8,
+        12
+      ],
+      "coefficients": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "modulus": 5,
+      "target": 4
+    },
+    {
+      "id": "linear-1",
+      "type": "choice-linear",
+      "nodes": [
+        1,
+        5,
+        9,
+        13
+      ],
+      "coefficients": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "modulus": 5,
+      "target": 4
+    },
+    {
+      "id": "linear-2",
+      "type": "choice-linear",
+      "nodes": [
+        2,
+        6,
+        10,
+        14
+      ],
+      "coefficients": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "modulus": 5,
+      "target": 2
+    },
+    {
+      "id": "linear-3",
+      "type": "choice-linear",
+      "nodes": [
+        3,
+        7,
+        11,
+        15
+      ],
+      "coefficients": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "modulus": 5,
+      "target": 4
+    },
+    {
+      "id": "digest-0",
+      "type": "digest-mod",
+      "nodes": [
+        0,
+        5,
+        10,
+        15
+      ],
+      "domain": "LW-DIGEST-0",
+      "modulus": 17,
+      "target": 12
+    },
+    {
+      "id": "digest-1",
+      "type": "digest-mod",
+      "nodes": [
+        1,
+        6,
+        11,
+        0
+      ],
+      "domain": "LW-DIGEST-1",
+      "modulus": 11,
+      "target": 6
+    },
+    {
+      "id": "length-0",
+      "type": "length-mod",
+      "nodes": [
+        3,
+        7,
+        11,
+        15
+      ],
+      "modulus": 13,
+      "target": 10
+    },
+    {
+      "id": "global-0",
+      "type": "digest-mod",
+      "nodes": [
+        1,
+        8,
+        15,
+        7
+      ],
+      "domain": "LW-GLOBAL-0",
+      "modulus": 2,
+      "target": 0
+    }
+  ],
+  "finalCommitment": "6912ac021bc6432036fccbdbbcf8b961d1224284ae8ca73dd31fd6db70d5f204"
+}
