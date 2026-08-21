@@ -17,20 +17,86 @@
 <script>
 (function packagedBootstrap() {
   const base = "play-payload/";
-  const css = ["css-01.asset","css-02.asset","css-03.asset","css-04.asset","css-05.asset"];
-  const js = Array.from({ length: 54 }, (_, index) => `js-${String(index + 1).padStart(2, "0")}.asset`);
+  const css = [
+    ["css-01.asset", "9c1e0bad13f9443884e2d48aab0bcb264ac5a635"],
+    ["css-02.asset", "4ace911e75c1d99ab55b0be2a022046560835b7d"],
+    ["css-03.asset", "857f8c1482a0fa0e90ea7038e1c2339a4f80cf10"],
+    ["css-04.asset", "936100551b3f1d22caf53c4821cba6f2fb966a0b"],
+    ["css-05.asset", "6e17d8762a18af841eb447da25d6dba82dba76de"]
+  ].map(([name, git]) => ({ name, git }));
+  const jsGitObjects = [
+    "fae42d13b43e2044b1e732b3cd6a0485c19536de",
+    "666f0b29b7e6cc1c3e1850b3a9af8ff8b1e3b5ec",
+    "c80a997fca108146d2a96b54cb99611f6b2174a7",
+    "289314e29b0deaf69b7b3e71251d0662be42dc16",
+    "e6218b3419e0d275011c11a6b730f92577d83a1c",
+    "953308d18054388cb80cdf43f4548bcff30f36d8",
+    "868833bc056dfa4b18c30dde4217561f6df8f5cf",
+    "ecdee00cd8d011fea604432cffb42a5f16248dee",
+    "b8d154c308f897597d59e5634f224d90c744dbd7",
+    "5625e4f771369d5503286cbbbf1dc70d96707969",
+    "599fa0d913d07307c6a619f752841697b95cbba5",
+    "59093cacc4f65ff40b2ee65d97fcbd8f991a635b",
+    "fae58f90fd0b278311eb6462f0daa86fba23f3b3",
+    "3b2f1022cb9a0032e49dc11389dc03568b267865",
+    "15d85696d122d01e5f058420ab990268839f8aa5",
+    "43e20752800be07d5740b435af5cee9a811f2f05",
+    "3a305f4dae8efe8b8c555b2b63bc2d18c6bd9196",
+    "eb4624b0028308ff901f1c6a24f65fecf34c1556",
+    "19144fbb63951b376bc719aa059030040d0c38fe",
+    "3b777aaf27433fae0643dd6d1394de861e385f2e",
+    "46da027779db947b7e9bc0326defb0c8e3d599f9",
+    "b46eed92ac5d8f0c2945d70cadde5c3593e7c0af",
+    "c849331ee08cc1b6f8981a339c5e512ba5776c87",
+    "af52bfaf57793c5308af4820c6321b2294801536",
+    "638934fde20efd214896ce39233129054b8db11c",
+    "3c948f472cb0432b3ea22d685a3d3c86da5f826d",
+    "751bb04d847141b94d4d207d748ab3028e4faa12",
+    "4d62b2580b8e2200b1f869fc743c8f554d05a8aa",
+    "592ba57a9b3ff751064aadcb53522e3370b626ff",
+    "816499957ec9d24ec0a5ffe610010318cd78796f",
+    "07387d7ddaa50cd9b9a0f3662f5e1acd152b3b4f",
+    "be63c0606f85caa6622c92d1aa9d26138641ee4a",
+    "da3a4f0aa69c95756f153613b8de676ac9271e03",
+    "ad1a5b03508a644905dffd493def78a485b28172",
+    "3fba056991cc4e5e419b1197608b3760fd4272b0",
+    "9371332187d8172ecc0937785e1c024ff77b08d3",
+    "aa1b790c2e7881459ff331c652cde3517b3392ad",
+    "7790903194ce44f4e25e7c9191e1413f365c2147",
+    "378cdc9318808ae0dc2e4643c6ed1c5f174fb4c8",
+    "47b6678d7a376243c9529aadfb19edad7909edd1",
+    "519a2feee8e8d3b9536e149943b55899343f0b35",
+    "d0029a20b1875bd98812b4ad1b6f1e1022b81d61",
+    "50f7555771cc5544e6a41f3dd84a264fe33bd3ec",
+    "20901d32da39b2fafc27ca2bfbd272064a76b64e",
+    "47576624bdda601cef5eca8576f8b75471a38296",
+    "607fa79ea80673a8f73b2a99fccb792e31ceb515",
+    "d2a8135d894733c0966ecbf1a796e921cc0c2f0b",
+    "b64357099cb0c9ab5b01612ffa23ae357636eacb",
+    "3beda23c8898e7c7c4e8312daaa0671c4d10bff9",
+    "ea2688c888c9dfbf6b208c42d6ab584822bec095",
+    "a3432c85ab07658572a2a91a4da738a104b3bcb1",
+    "3e709f17829457b7ba7711429db6539759d647c1",
+    "08797624f1a99044ee54824361fb0da172dfbdeb",
+    "db1ab51b86790d2a2bec3fe4d3f3b02d1b283edb"
+  ];
+  const js = jsGitObjects.map((git, index) => ({
+    name: `js-${String(index + 1).padStart(2, "0")}.asset`,
+    git
+  }));
 
-  function readText(path) {
+  function readBytes(path) {
     return fetch(path, { cache: "no-store" }).then((response) => {
       if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-      return response.text();
-    }).catch((fetchError) => new Promise((resolve, reject) => {
+      return response.arrayBuffer();
+    }).then((buffer) => new Uint8Array(buffer)).catch((fetchError) => new Promise((resolve, reject) => {
       try {
         const xhr = new XMLHttpRequest();
         xhr.open("GET", path, true);
+        xhr.responseType = "arraybuffer";
         xhr.onload = () => {
           if ((xhr.status >= 200 && xhr.status < 300) || (location.protocol === "file:" && xhr.status === 0)) {
-            resolve(xhr.responseText);
+            resolve(new Uint8Array(xhr.response));
           } else {
             reject(fetchError);
           }
@@ -43,16 +109,53 @@
     }));
   }
 
+  function hex(bytes) {
+    return Array.from(bytes, (byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function assertGitObject(item, bytes) {
+    const subtle = globalThis.crypto && globalThis.crypto.subtle;
+    if (!subtle) {
+      console.warn(`Git object integrity check unavailable for ${item.name}`);
+      return;
+    }
+    const encoder = new TextEncoder();
+    const header = encoder.encode(`blob ${bytes.byteLength}\0`);
+    const input = new Uint8Array(header.byteLength + bytes.byteLength);
+    input.set(header, 0);
+    input.set(bytes, header.byteLength);
+    let digest;
+    try {
+      digest = await subtle.digest("SHA-1", input);
+    } catch (error) {
+      if (error && error.name === "NotSupportedError") {
+        console.warn(`SHA-1 integrity check unavailable for ${item.name}`);
+        return;
+      }
+      throw error;
+    }
+    const actual = hex(new Uint8Array(digest));
+    if (actual !== item.git) {
+      throw new Error(`${item.name}: Git object mismatch (expected ${item.git}, got ${actual})`);
+    }
+  }
+
+  async function verifiedText(item) {
+    const bytes = await readBytes(base + item.name);
+    await assertGitObject(item, bytes);
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  }
+
   async function start() {
-    for (const name of css) {
+    for (const item of css) {
       const style = document.createElement("style");
-      style.dataset.packagedFrom = name;
-      style.textContent = await readText(base + name);
+      style.dataset.packagedFrom = item.name;
+      style.textContent = await verifiedText(item);
       document.head.appendChild(style);
     }
-    for (const name of js) {
-      const source = await readText(base + name);
-      (0, eval)(`${source}\n//# sourceURL=${base + name}`);
+    for (const item of js) {
+      const source = await verifiedText(item);
+      (0, eval)(`${source}\n//# sourceURL=${base + item.name}`);
     }
   }
 
