@@ -28,6 +28,10 @@ export default defineConfig({
   root: '.',
   base: './',
   plugins: [inlineBase64Fonts()],
-  server: { port: 5173 },
-  build: { outDir: 'dist' }
+  server: {
+    port: 5173
+  },
+  build: {
+    outDir: 'dist'
+  }
 });
